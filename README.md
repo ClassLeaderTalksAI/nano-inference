@@ -4,8 +4,9 @@
 
 A Python gateway for exploring request routing, streaming, bounded admission,
 failure handling, and performance measurement around independent inference replicas.
-The first milestone runs entirely on a Mac or Linux CPU with two deterministic
-simulated workers. vLLM integration and real GPU measurements are upcoming milestones.
+The platform runs on a Mac or Linux CPU with two deterministic simulated workers.
+Prefix affinity and a real-model llama.cpp CPU compatibility check are implemented.
+vLLM integration and real GPU measurements are upcoming milestones.
 
 ## Run locally
 
@@ -19,6 +20,7 @@ uv run nano-inference local
 This starts a gateway on `127.0.0.1:8000` and simulated workers on ports `8101`
 and `8102`. Keep it running and use another terminal for requests. Stop with Ctrl-C;
 the launcher shuts down its children. All three ports must be available.
+Use `--port 8001 --worker-ports 8111 8112` to run a separate local cluster.
 
 ```bash
 curl -N http://127.0.0.1:8000/v1/chat/completions \
@@ -51,6 +53,7 @@ Benchmark / client
 | `protocol.py` | Explicit chat request subset and SSE framing/parser |
 | `mock_worker.py` | Deterministic output, delays, HTTP failures, mid-stream errors |
 | `routing.py` | Worker registry, round robin / least in-flight, capacity reservations, FIFO queue |
+| `prefix.py` | Token-prefix identity, bounded tokenizer work, expiring LRU affinity hints |
 | `gateway.py` | Forwarding, cancellation, deadlines, health probes, metrics, request logs |
 | `benchmark.py` | Closed-loop / open-loop workload generation and raw JSON results |
 | `cli.py` | Individual services and local process launcher |
@@ -62,6 +65,73 @@ have independent counters and queues; shared coordination is outside this milest
 `least_inflight` selects the healthy replica with the fewest assigned, unfinished
 requests, using rotating ties. `round_robin` rotates through healthy replicas with
 available capacity. Neither policy estimates prompt cost or GPU utilization yet.
+
+## Prefix-affinity routing
+
+```bash
+uv run nano-inference local --policy prefix_affinity --prefix-tokens 64 \
+  --affinity-capacity 1024 --affinity-ttl 60 --affinity-max-skew 1
+
+uv run nano-inference benchmark --requests 24 --concurrency 1 \
+  --workload repeated_prefix --prefix-groups 4 --prefix-repetitions 32
+```
+
+The router hashes a fixed prefix of the **fully templated token sequence**, together
+with model revision, tokenizer fingerprint, template fingerprint and prefix length.
+Short prompts fall back to least in-flight. The simulator uses explicitly labeled
+synthetic byte IDs; real models require a prepared fast Hugging Face tokenizer and
+an explicit model revision. The real CPU check below verifies token IDs against the
+serving engine for the tested model/template pair.
+
+After a request completes successfully, the selected worker becomes the hint's
+home. Later requests prefer that home if healthy, below capacity, and no more than
+`affinity-max-skew` assigned requests busier than the least-loaded eligible worker
+**before assignment**. Otherwise they use the less-loaded worker immediately. FIFO
+admission still applies; a request never waits solely for its preferred worker.
+
+Hints are bounded by LRU capacity, expire after their last successful home completion,
+and are cleared on observed worker health transitions. Reads and fallback completions
+do not extend a home's lifetime. Completions from an older worker generation cannot
+recreate a hint after observed failure/recovery. A restart between health probes can
+go unobserved; TTL remains a fallback, and hints never guarantee cache residency.
+
+`X-Route-Decision`, request logs, `/workers`, and `nano_route_decisions_total` report
+`affinity_miss`, `affinity_hit`, `affinity_load_override`, or `prefix_too_short`.
+**An affinity hit is a router decision, not a measured GPU cache hit.**
+
+Tokenization runs in a bounded admission stage (default four concurrent preparations),
+before the bounded generation queue. Excess preparation work gets HTTP 429
+`prefix_preparation_full`; callers exceeding 200,000 aggregate message characters get
+413 for this policy. Cancellation retains a preparation permit until the actual
+tokenizer thread finishes. The overall request deadline includes this stage. Real
+tokenizer loading is local-only and uses no remote Python code.
+
+## Real-model CPU check on Apple Silicon
+
+```bash
+uv sync --locked --extra dev --extra tokenizer
+uv run python scripts/prepare_llama.py
+uv run --extra tokenizer python scripts/smoke_llama.py
+```
+
+Preparation downloads about 2.6 GB into ignored `.local/`: a pinned official
+llama.cpp Mac ARM runtime, a community Q4_K_M conversion of
+`Qwen3-4B-Instruct-2507`, and the original model's tokenizer. Downloads use immutable
+revisions and SHA256 checks. No system package installation is needed. Model files
+stay local and are not committed to Git.
+
+The smoke script launches one CPU-only llama.cpp replica and a prefix-affinity
+gateway on temporary local ports. It checks exact template/tokenization agreement,
+ordinary and streaming completions, usage, affinity reuse, generation cancellation,
+backend-slot cleanup, and a successful request after cancellation. Both child
+services are stopped in `finally`. The JSON evidence is saved to
+`results/examples/real-cpu-smoke.json`; service logs stay in `.local/`.
+
+CPU execution uses `--device none --n-gpu-layers 0 --no-op-offload`. This verifies
+real-model compatibility on the tested Mac, not vLLM GPU behavior or routing speedups.
+The runtime preparer targets macOS arm64; other platforms can supply their own
+compatible llama-server. See [the CPU integration guide](docs/local-model.md) for
+pinned artifacts and commands to keep a real-model gateway running.
 
 ## Overload and failure behavior
 
@@ -146,8 +216,12 @@ not an exact measurement of engine TTFT or per-token decode latency.
 Open-loop work is bounded at the client: arrivals exceeding `max-outstanding` are
 recorded as `client_dropped`, distinct from server rejection. Dispatch lag and
 arrival-based timing expose client scheduling delays. Throughput uses the full run
-including drain time. This initial workload uses a short prompt with a unique ID
-per request; mixed-length and repeated-prefix workloads are future work.
+including drain time. Workloads include `short`, `mixed` (three prompt/output limits),
+`repeated_prefix` (multiple system-prefix groups), and `single_prefix` (one-prefix
+control). `prefix-repetitions` controls text repetition, not an exact token length;
+backend prompt-token usage records the actual count. Every result also retains its
+routing decision. The runner measures one workload run; it does not automatically
+perform policy sweeps, warmups, cache resets, or significance analysis.
 
 ## API scope
 
@@ -163,9 +237,9 @@ administration API is intended only for local experiments.
 ## Test
 
 ```bash
-uv run ruff check .
-uv run ruff format --check .
-uv run pytest -q
+uv run --extra dev ruff check .
+uv run --extra dev ruff format --check .
+uv run --extra dev --extra tokenizer pytest -q
 ```
 
 Tests use real TCP servers for incremental delivery, cancellation before response

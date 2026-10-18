@@ -1,0 +1,358 @@
+{
+  "schema_version": 1,
+  "label": "simulated",
+  "started_at_utc": "2026-10-18T14:31:46.856178+00:00",
+  "runtime": {
+    "python": "3.13.6",
+    "system": "Darwin",
+    "machine": "arm64"
+  },
+  "gateway_before": {
+    "policy": "prefix_affinity",
+    "capacity_per_worker": 2,
+    "queued": 0,
+    "max_queue": 4,
+    "queue_timeout_seconds": 2.0,
+    "route_decisions": {
+      "affinity_miss": 4,
+      "affinity_hit": 20
+    },
+    "affinity": {
+      "entries": 4,
+      "capacity": 1024,
+      "ttl_seconds": 60.0,
+      "max_load_skew": 1
+    },
+    "workers": [
+      {
+        "id": "worker-1",
+        "healthy": true,
+        "inflight": 0,
+        "last_health_check": 1792333906.01212
+      },
+      {
+        "id": "worker-2",
+        "healthy": true,
+        "inflight": 0,
+        "last_health_check": 1792333906.0126588
+      }
+    ],
+    "prefix_preparation": {
+      "capacity": 16,
+      "inflight": 0
+    },
+    "prefix_identity": {
+      "model": "nano-model",
+      "model_revision": "simulator-v1",
+      "encoding": "synthetic_bytes",
+      "tokenizer_fingerprint": "utf8-v1",
+      "chat_template_fingerprint": "70bd23818db3bbf314191479c22807552e572e264018efe22f3e049ed8e090c9",
+      "prefix_tokens": 64
+    }
+  },
+  "gateway_after": {
+    "policy": "prefix_affinity",
+    "capacity_per_worker": 2,
+    "queued": 0,
+    "max_queue": 4,
+    "queue_timeout_seconds": 2.0,
+    "route_decisions": {
+      "affinity_miss": 4,
+      "affinity_hit": 28,
+      "affinity_load_override": 8
+    },
+    "affinity": {
+      "entries": 4,
+      "capacity": 1024,
+      "ttl_seconds": 60.0,
+      "max_load_skew": 1
+    },
+    "workers": [
+      {
+        "id": "worker-1",
+        "healthy": true,
+        "inflight": 0,
+        "last_health_check": 1792333907.015958
+      },
+      {
+        "id": "worker-2",
+        "healthy": true,
+        "inflight": 0,
+        "last_health_check": 1792333907.016235
+      }
+    ],
+    "prefix_preparation": {
+      "capacity": 16,
+      "inflight": 0
+    },
+    "prefix_identity": {
+      "model": "nano-model",
+      "model_revision": "simulator-v1",
+      "encoding": "synthetic_bytes",
+      "tokenizer_fingerprint": "utf8-v1",
+      "chat_template_fingerprint": "70bd23818db3bbf314191479c22807552e572e264018efe22f3e049ed8e090c9",
+      "prefix_tokens": 64
+    }
+  },
+  "config": {
+    "url": "http://127.0.0.1:8000",
+    "model": "nano-model",
+    "requests": 16,
+    "concurrency": 8,
+    "rate": null,
+    "max_outstanding": 128,
+    "max_tokens": 16,
+    "timeout": 60,
+    "slo": 2,
+    "workload": "repeated_prefix",
+    "prefix_groups": 1,
+    "prefix_repetitions": 32
+  },
+  "summary": {
+    "requests": 16,
+    "outcomes": {
+      "success": 16
+    },
+    "elapsed_seconds": 0.5227992090003681,
+    "successful_requests_per_second": 30.604483948231707,
+    "output_tokens_per_second": 489.6717431717073,
+    "successful_requests_meeting_ttft_slo_per_second": 30.604483948231707,
+    "ttft_slo_seconds": 2,
+    "successful_first_content_seconds": {
+      "p50": 0.16952433299957193,
+      "p95": 0.1788199587501822
+    },
+    "successful_latency_seconds": {
+      "p50": 0.25967010399972423,
+      "p95": 0.26538219849999223
+    },
+    "max_dispatch_lag_seconds": 1.554099981149193e-05,
+    "note": "First content is a client observation; content events are not token counts."
+  },
+  "results": [
+    {
+      "index": 0,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 0.1256987910001044,
+      "dispatch_lag_seconds": 1.3082999430480413e-05,
+      "first_content_seconds": 0.037277249999533524,
+      "completion_tokens": 16,
+      "content_events": 16,
+      "route_decision": "affinity_hit",
+      "prompt_tokens": 264,
+      "error_code": null
+    },
+    {
+      "index": 1,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 0.13242854100008117,
+      "dispatch_lag_seconds": 7.915999958640896e-06,
+      "first_content_seconds": 0.042685207999966224,
+      "completion_tokens": 16,
+      "content_events": 16,
+      "route_decision": "affinity_hit",
+      "prompt_tokens": 264,
+      "error_code": null
+    },
+    {
+      "index": 2,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 0.13043787500009785,
+      "dispatch_lag_seconds": 5.083999894850422e-06,
+      "first_content_seconds": 0.04355933399983769,
+      "completion_tokens": 16,
+      "content_events": 16,
+      "route_decision": "affinity_load_override",
+      "prompt_tokens": 264,
+      "error_code": null
+    },
+    {
+      "index": 3,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 0.1316796670007534,
+      "dispatch_lag_seconds": 4.417000127432402e-06,
+      "first_content_seconds": 0.04353504200025782,
+      "completion_tokens": 16,
+      "content_events": 16,
+      "route_decision": "affinity_load_override",
+      "prompt_tokens": 264,
+      "error_code": null
+    },
+    {
+      "index": 4,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 0.24411404199963727,
+      "dispatch_lag_seconds": 4.1249995774705894e-06,
+      "first_content_seconds": 0.15883858399956807,
+      "completion_tokens": 16,
+      "content_events": 16,
+      "route_decision": "affinity_hit",
+      "prompt_tokens": 264,
+      "error_code": null
+    },
+    {
+      "index": 5,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 0.26113508399976126,
+      "dispatch_lag_seconds": 4.791999344888609e-06,
+      "first_content_seconds": 0.16604212499987625,
+      "completion_tokens": 16,
+      "content_events": 16,
+      "route_decision": "affinity_load_override",
+      "prompt_tokens": 264,
+      "error_code": null
+    },
+    {
+      "index": 6,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 0.26278629199987336,
+      "dispatch_lag_seconds": 7.374999768217094e-06,
+      "first_content_seconds": 0.1680813749999288,
+      "completion_tokens": 16,
+      "content_events": 16,
+      "route_decision": "affinity_hit",
+      "prompt_tokens": 264,
+      "error_code": null
+    },
+    {
+      "index": 7,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 0.26133945799938374,
+      "dispatch_lag_seconds": 4.083000021637417e-06,
+      "first_content_seconds": 0.16808279099950596,
+      "completion_tokens": 16,
+      "content_events": 16,
+      "route_decision": "affinity_load_override",
+      "prompt_tokens": 264,
+      "error_code": null
+    },
+    {
+      "index": 8,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 0.25930145799975435,
+      "dispatch_lag_seconds": 1.3332999515114352e-05,
+      "first_content_seconds": 0.17411579199961125,
+      "completion_tokens": 16,
+      "content_events": 16,
+      "route_decision": "affinity_hit",
+      "prompt_tokens": 264,
+      "error_code": null
+    },
+    {
+      "index": 9,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 0.2652405839999119,
+      "dispatch_lag_seconds": 8.416999662586022e-06,
+      "first_content_seconds": 0.17883808399983536,
+      "completion_tokens": 16,
+      "content_events": 16,
+      "route_decision": "affinity_hit",
+      "prompt_tokens": 264,
+      "error_code": null
+    },
+    {
+      "index": 10,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 0.2658070420002332,
+      "dispatch_lag_seconds": 9.708999641588889e-06,
+      "first_content_seconds": 0.1788139170002978,
+      "completion_tokens": 16,
+      "content_events": 16,
+      "route_decision": "affinity_load_override",
+      "prompt_tokens": 264,
+      "error_code": null
+    },
+    {
+      "index": 11,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 0.2650364590008394,
+      "dispatch_lag_seconds": 6.3340003180201165e-06,
+      "first_content_seconds": 0.17857083400031115,
+      "completion_tokens": 16,
+      "content_events": 16,
+      "route_decision": "affinity_load_override",
+      "prompt_tokens": 264,
+      "error_code": null
+    },
+    {
+      "index": 12,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 0.2608098330001667,
+      "dispatch_lag_seconds": 1.2333000086073298e-05,
+      "first_content_seconds": 0.1748038750001797,
+      "completion_tokens": 16,
+      "content_events": 16,
+      "route_decision": "affinity_hit",
+      "prompt_tokens": 264,
+      "error_code": null
+    },
+    {
+      "index": 13,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 0.2546938750001573,
+      "dispatch_lag_seconds": 1.554099981149193e-05,
+      "first_content_seconds": 0.1709658749996379,
+      "completion_tokens": 16,
+      "content_events": 16,
+      "route_decision": "affinity_hit",
+      "prompt_tokens": 264,
+      "error_code": null
+    },
+    {
+      "index": 14,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 0.2600387499996941,
+      "dispatch_lag_seconds": 7.249999725900125e-06,
+      "first_content_seconds": 0.17243816599966522,
+      "completion_tokens": 16,
+      "content_events": 16,
+      "route_decision": "affinity_load_override",
+      "prompt_tokens": 264,
+      "error_code": null
+    },
+    {
+      "index": 15,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 0.25820412499979284,
+      "dispatch_lag_seconds": 8.541999704902992e-06,
+      "first_content_seconds": 0.17105233300026157,
+      "completion_tokens": 16,
+      "content_events": 16,
+      "route_decision": "affinity_load_override",
+      "prompt_tokens": 264,
+      "error_code": null
+    }
+  ]
+}

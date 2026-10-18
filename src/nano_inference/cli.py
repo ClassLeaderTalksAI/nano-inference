@@ -16,20 +16,27 @@ from .mock_worker import Behavior, create_mock_worker
 def gateway_options(parser):
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument(
-        "--policy", choices=["round_robin", "least_inflight"], default="least_inflight"
+        "--policy",
+        choices=["round_robin", "least_inflight", "prefix_affinity"],
+        default="least_inflight",
     )
     parser.add_argument("--capacity", type=int, default=4, help="In-flight limit per worker")
     parser.add_argument("--max-queue", type=int, default=16)
     parser.add_argument("--queue-timeout", type=float, default=2)
     parser.add_argument("--request-timeout", type=float, default=30)
+    parser.add_argument("--prefix-tokens", type=int, default=64)
+    parser.add_argument("--affinity-capacity", type=int, default=1024)
+    parser.add_argument("--affinity-ttl", type=float, default=60)
+    parser.add_argument("--affinity-max-skew", type=int, default=1)
+    parser.add_argument("--prefix-preparations", type=int, default=4)
 
 
 def run_local(args):
     """Start three ordinary processes and reap all children on exit or startup failure."""
     base = [sys.executable, "-m", "nano_inference"]
     commands = [
-        [*base, "worker", "--name", "mock-a", "--port", "8101"],
-        [*base, "worker", "--name", "mock-b", "--port", "8102"],
+        [*base, "worker", "--name", "mock-a", "--port", str(args.worker_ports[0])],
+        [*base, "worker", "--name", "mock-b", "--port", str(args.worker_ports[1])],
         [
             *base,
             "gateway",
@@ -45,6 +52,18 @@ def run_local(args):
             str(args.queue_timeout),
             "--request-timeout",
             str(args.request_timeout),
+            "--prefix-tokens",
+            str(args.prefix_tokens),
+            "--affinity-capacity",
+            str(args.affinity_capacity),
+            "--affinity-ttl",
+            str(args.affinity_ttl),
+            "--affinity-max-skew",
+            str(args.affinity_max_skew),
+            "--prefix-preparations",
+            str(args.prefix_preparations),
+            "--worker-urls",
+            *[f"http://127.0.0.1:{p}" for p in args.worker_ports],
         ],
     ]
     children = []
@@ -64,6 +83,8 @@ def run_local(args):
                     code = child.wait(timeout=0.1)
                 except subprocess.TimeoutExpired:
                     continue
+                if stopping:
+                    break
                 raise SystemExit(code or 1)
     finally:
         for child in children:
@@ -84,6 +105,7 @@ def main():
     commands = parser.add_subparsers(dest="command", required=True)
     local = commands.add_parser("local", help="Run gateway and two CPU-only simulators")
     gateway_options(local)
+    local.add_argument("--worker-ports", type=int, nargs=2, default=[8101, 8102])
     worker = commands.add_parser("worker", help="Run one simulated inference worker")
     worker.add_argument("--name", default="mock-a")
     worker.add_argument("--port", type=int, default=8101)
@@ -94,6 +116,10 @@ def main():
     gateway.add_argument("--worker-urls", nargs="+", default=Settings().worker_urls)
     gateway.add_argument("--model", default="nano-model")
     gateway.add_argument("--health-interval", type=float, default=1)
+    gateway.add_argument("--model-revision", default="simulator-v1")
+    gateway.add_argument(
+        "--prefix-tokenizer", help="Prepared local Hugging Face tokenizer directory"
+    )
     benchmark = commands.add_parser("benchmark")
     benchmark.add_argument("--url", default="http://127.0.0.1:8000")
     benchmark.add_argument("--model", default="nano-model")
@@ -106,6 +132,13 @@ def main():
     benchmark.add_argument("--slo", type=float, default=2, help="First-content SLO in seconds")
     benchmark.add_argument("--output", default="results/latest.json")
     benchmark.add_argument("--label", default="simulated")
+    benchmark.add_argument(
+        "--workload",
+        choices=["short", "mixed", "repeated_prefix", "single_prefix"],
+        default="short",
+    )
+    benchmark.add_argument("--prefix-groups", type=int, default=8)
+    benchmark.add_argument("--prefix-repetitions", type=int, default=128)
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(name)s %(message)s")
     logging.getLogger("httpx").setLevel(logging.WARNING)

@@ -25,9 +25,42 @@ class Result:
     first_content_seconds: float | None = None
     completion_tokens: int | None = None
     content_events: int = 0
+    route_decision: str | None = None
+    prompt_tokens: int | None = None
+    error_code: str | None = None
 
 
-async def send_request(client, url: str, model: str, max_tokens: int, index: int, scheduled: float):
+def workload_messages(index: int, workload: str, groups: int, repetitions: int) -> list[dict]:
+    if workload in ("repeated_prefix", "single_prefix"):
+        group = index % groups if workload == "repeated_prefix" else 0
+        return [
+            {
+                "role": "system",
+                "content": f"Document group {group}. "
+                + "Requests enter a queue and workers consume them. " * repetitions,
+            },
+            {"role": "user", "content": f"Summarize this document. Question {index}."},
+        ]
+    if workload == "mixed":
+        return [
+            {
+                "role": "user",
+                "content": f"Request {index}. "
+                + "Explain a distributed queue. " * (1, 32, 128)[index % 3],
+            }
+        ]
+    return [{"role": "user", "content": f"Explain a queue in one paragraph. ID {index}"}]
+
+
+async def send_request(
+    client,
+    url: str,
+    model: str,
+    max_tokens: int,
+    index: int,
+    scheduled: float,
+    messages: list[dict] | None = None,
+):
     dispatched = time.perf_counter()
     result = Result(index, "client_error", dispatch_lag_seconds=dispatched - scheduled)
     try:
@@ -36,9 +69,7 @@ async def send_request(client, url: str, model: str, max_tokens: int, index: int
             url.rstrip("/") + "/v1/chat/completions",
             json={
                 "model": model,
-                "messages": [
-                    {"role": "user", "content": f"Explain a queue in one paragraph. ID {index}"}
-                ],
+                "messages": messages or workload_messages(index, "short", 1, 1),
                 "stream": True,
                 "max_tokens": max_tokens,
                 "temperature": 0,
@@ -47,8 +78,15 @@ async def send_request(client, url: str, model: str, max_tokens: int, index: int
         ) as response:
             result.http_status = response.status_code
             result.worker = response.headers.get("x-worker-id")
+            result.route_decision = response.headers.get("x-route-decision")
             if response.status_code != 200:
                 result.outcome = "rejected" if response.status_code == 429 else "http_error"
+                try:
+                    result.error_code = (
+                        json.loads(await response.aread()).get("error", {}).get("code")
+                    )
+                except (ValueError, AttributeError):
+                    pass
                 return result
             result.outcome = "incomplete_stream"
             finished = False
@@ -60,6 +98,7 @@ async def send_request(client, url: str, model: str, max_tokens: int, index: int
                 event = json.loads(data)
                 if "error" in event:
                     result.outcome = "stream_error"
+                    result.error_code = event["error"].get("code")
                     break
                 if has_content(event):
                     result.content_events += 1
@@ -71,6 +110,9 @@ async def send_request(client, url: str, model: str, max_tokens: int, index: int
                 tokens = (event.get("usage") or {}).get("completion_tokens")
                 if type(tokens) is int and tokens >= 0:
                     result.completion_tokens = tokens
+                prompt_tokens = (event.get("usage") or {}).get("prompt_tokens")
+                if type(prompt_tokens) is int and prompt_tokens >= 0:
+                    result.prompt_tokens = prompt_tokens
     except (httpx.HTTPError, TimeoutError, ValueError, TypeError, AttributeError):
         result.outcome = "client_error"
     finally:
@@ -128,6 +170,9 @@ async def run_benchmark(
     slo: float = 2,
     output: str = "results/latest.json",
     label: str = "simulated",
+    workload: str = "short",
+    prefix_groups: int = 8,
+    prefix_repetitions: int = 128,
 ) -> dict:
     if min(requests, concurrency, max_outstanding, max_tokens, timeout, slo) <= 0 or any(
         not math.isfinite(t) for t in (timeout, slo)
@@ -135,6 +180,10 @@ async def run_benchmark(
         raise ValueError("Counts and timeouts must be positive")
     if rate is not None and (not math.isfinite(rate) or rate <= 0):
         raise ValueError("Rate must be finite and positive")
+    if workload not in ("short", "mixed", "repeated_prefix", "single_prefix"):
+        raise ValueError("Unknown workload")
+    if prefix_groups < 1 or not 1 <= prefix_repetitions <= 2048:
+        raise ValueError("Prefix groups must be positive and repetitions must be 1–2048")
     results: list[Result] = []
     timestamp = datetime.now(UTC).isoformat()
     async with httpx.AsyncClient(
@@ -155,7 +204,13 @@ async def run_benchmark(
 
         async def one(index, scheduled):
             async with asyncio.timeout(timeout):
-                return await send_request(client, url, model, max_tokens, index, scheduled)
+                output_limit = max_tokens
+                if workload == "mixed":
+                    output_limit = max(1, max_tokens // (4, 2, 1)[index % 3])
+                messages = workload_messages(index, workload, prefix_groups, prefix_repetitions)
+                return await send_request(
+                    client, url, model, output_limit, index, scheduled, messages
+                )
 
         async def collect(index, scheduled):
             try:
@@ -224,6 +279,9 @@ async def run_benchmark(
             "max_tokens": max_tokens,
             "timeout": timeout,
             "slo": slo,
+            "workload": workload,
+            "prefix_groups": prefix_groups,
+            "prefix_repetitions": prefix_repetitions,
         },
         "summary": summarize(results, elapsed, slo),
         "results": [asdict(r) for r in sorted(results, key=lambda r: r.index)],

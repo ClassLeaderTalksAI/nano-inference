@@ -1,6 +1,9 @@
 """Exercise actual CLI subprocesses and an abrupt worker process death."""
 
 import asyncio
+import os
+import signal
+import socket
 import sys
 
 import httpx
@@ -96,4 +99,54 @@ async def test_cli_worker_crash_interrupts_stream_and_restart_recovers(unused_tc
                 await asyncio.wait_for(child.wait(), 5)
             except TimeoutError:
                 child.kill()
+                await child.wait()
+
+
+async def test_local_launcher_ctrl_c_reaps_children_and_exits_successfully(unused_tcp_port_factory):
+    ports = [unused_tcp_port_factory() for _ in range(3)]
+    child = await asyncio.create_subprocess_exec(
+        sys.executable,
+        "-m",
+        "nano_inference",
+        "local",
+        "--port",
+        str(ports[0]),
+        "--worker-ports",
+        str(ports[1]),
+        str(ports[2]),
+        "--policy",
+        "prefix_affinity",
+        stdout=asyncio.subprocess.DEVNULL,
+        stderr=asyncio.subprocess.DEVNULL,
+        start_new_session=True,
+    )
+    try:
+        async with httpx.AsyncClient(trust_env=False, timeout=2) as client:
+
+            async def ready():
+                if child.returncode is not None:
+                    raise RuntimeError("Local launcher exited before startup")
+                try:
+                    return (
+                        await client.get(f"http://127.0.0.1:{ports[0]}/ready")
+                    ).status_code == 200
+                except httpx.HTTPError:
+                    return False
+
+            await eventually(ready, seconds=10)
+        # A terminal Ctrl-C reaches the entire foreground process group. This
+        # group belongs exclusively to the child session created by this test.
+        os.killpg(child.pid, signal.SIGINT)
+        await asyncio.wait_for(child.wait(), 8)
+        assert child.returncode == 0
+        for port in ports:
+            with socket.socket() as sock:
+                assert sock.connect_ex(("127.0.0.1", port)) != 0
+    finally:
+        if child.returncode is None:
+            os.killpg(child.pid, signal.SIGTERM)
+            try:
+                await asyncio.wait_for(child.wait(), 8)
+            except TimeoutError:
+                os.killpg(child.pid, signal.SIGKILL)
                 await child.wait()

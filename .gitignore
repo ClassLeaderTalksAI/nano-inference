@@ -221,3 +221,5 @@ __marimo__/
 
 # Local workload output; publish selected runs under results/examples/.
 results/*.json
+.local/
+*.gguf

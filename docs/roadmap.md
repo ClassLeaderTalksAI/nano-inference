@@ -20,7 +20,11 @@ continuous batching, and KV-cache allocation.
 | 7 — Two GPUs | Two independent replicas, one full model per GPU | Reproducible routing, cache, overload and failure experiments |
 | 8 — Analysis | Raw data, configuration, plots and documented limitations | Every performance claim traceable to measured runs |
 
-Milestones 1–3 are the first implementation batch. Milestones 4–8 remain pending.
+Milestones 1–3 were delivered in the first implementation batch. Milestone 4 is
+implemented and tested with two simulated replicas; milestone 5 is verified with a
+pinned Qwen3-4B-Instruct-2507 Q4 model on the local Mac CPU. See
+[the real-model integration guide](local-model.md) and the raw example reports.
+Milestones 6–8 remain pending.
 CLI and request fields may evolve as real backend integration reveals differences.
 
 ## Model and hardware starting point
@@ -65,8 +69,9 @@ network latency from engine timings.
 ## Boundaries
 
 The first version is a single gateway process, with static worker URLs and local
-state. Prefix hints, token-aware cost models, Grafana, real-model deployment scripts
-and measured performance improvements are not yet implemented. Distributed KV
+state. Prefix hints, mixed/prefix workload generation and a pinned local CPU model
+check are implemented. Token-aware cost models, Grafana, vLLM GPU deployment scripts
+and measured GPU performance improvements remain pending. Distributed KV
 storage, prefill/decode disaggregation, autoscaling, Kubernetes, and custom GPU
 kernels are follow-up projects rather than first-version requirements.
 

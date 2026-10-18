@@ -17,6 +17,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, Response, StreamingResponse
 from prometheus_client import CollectorRegistry, Counter, Gauge, Histogram, generate_latest
 
+from .prefix import PrefixEncoder, PrefixPreparer
 from .protocol import ChatRequest, has_content, sse, sse_data
 from .routing import AdmissionError, Lease, Policy, WorkerPool
 
@@ -36,11 +37,25 @@ class Settings:
     request_timeout: float = 30
     health_interval: float = 1
     health_timeout: float = 1
+    model_revision: str = "simulator-v1"
+    prefix_tokenizer: str | None = None
+    prefix_tokens: int = 64
+    prefix_preparations: int = 4
+    affinity_capacity: int = 1024
+    affinity_ttl: float = 60
+    affinity_max_skew: int = 1
 
     def __post_init__(self):
         timings = (self.request_timeout, self.health_interval, self.health_timeout)
         if any(not math.isfinite(t) or t <= 0 for t in timings):
             raise ValueError("Timeouts and health interval must be positive")
+        if self.prefix_tokens < 1 or self.prefix_preparations < 1 or not self.model_revision:
+            raise ValueError("Prefix settings require positive counts and a model revision")
+        if self.policy == "prefix_affinity" and self.model != "nano-model":
+            if not self.prefix_tokenizer or self.model_revision == "simulator-v1":
+                raise ValueError(
+                    "Real-model affinity requires a local tokenizer and model revision"
+                )
         for url in self.worker_urls:
             parsed = httpx.URL(url)
             if parsed.scheme not in ("http", "https") or not parsed.host:
@@ -63,7 +78,9 @@ class ManagedStream(StreamingResponse):
                 await self.cleanup()
 
 
-def create_gateway(settings: Settings | None = None, *, transport=None) -> FastAPI:
+def create_gateway(
+    settings: Settings | None = None, *, transport=None, prefix_encoder=None
+) -> FastAPI:
     settings = settings or Settings()
     pool = WorkerPool(
         settings.worker_urls,
@@ -71,6 +88,9 @@ def create_gateway(settings: Settings | None = None, *, transport=None) -> FastA
         settings.capacity,
         settings.max_queue,
         settings.queue_timeout,
+        settings.affinity_capacity,
+        settings.affinity_ttl,
+        settings.affinity_max_skew,
     )
     registry = CollectorRegistry()
     completed = Counter(
@@ -89,6 +109,16 @@ def create_gateway(settings: Settings | None = None, *, transport=None) -> FastA
     active = Gauge("nano_worker_inflight", "Reserved requests", ["worker"], registry=registry)
     queued = Gauge("nano_queued_requests", "Requests waiting for admission", registry=registry)
     queued.set_function(lambda: len(pool.waiters))
+    route_decisions = Counter(
+        "nano_route_decisions_total",
+        "Routing decisions, not cache hits",
+        ["decision"],
+        registry=registry,
+    )
+    prefix_inflight = Gauge(
+        "nano_prefix_preparations", "Running tokenizer preparations", registry=registry
+    )
+    prefix_inflight.set_function(lambda: len(app.state.preparer.tasks) if app.state.preparer else 0)
     for worker in pool.workers:
         active.labels(worker.name).set_function(lambda w=worker: w.inflight)
 
@@ -113,6 +143,22 @@ def create_gateway(settings: Settings | None = None, *, transport=None) -> FastA
 
     @asynccontextmanager
     async def lifespan(app):
+        if settings.policy == "prefix_affinity":
+            encoder = prefix_encoder
+            if encoder is None:
+                if settings.prefix_tokenizer:
+                    encoder = await asyncio.to_thread(
+                        PrefixEncoder.from_pretrained,
+                        settings.model,
+                        settings.model_revision,
+                        settings.prefix_tokens,
+                        settings.prefix_tokenizer,
+                    )
+                else:
+                    encoder = PrefixEncoder(
+                        settings.model, settings.model_revision, settings.prefix_tokens
+                    )
+            app.state.preparer = PrefixPreparer(encoder, settings.prefix_preparations)
         # Keep one pooled client per gateway; health requests have their own short timeout.
         async with httpx.AsyncClient(
             transport=transport,
@@ -129,10 +175,13 @@ def create_gateway(settings: Settings | None = None, *, transport=None) -> FastA
                 monitor.cancel()
                 with contextlib.suppress(asyncio.CancelledError):
                     await monitor
+                if app.state.preparer:
+                    await app.state.preparer.close()
 
     app = FastAPI(title="nano-inference", lifespan=lifespan)
     app.state.pool = pool
     app.state.probe = probe
+    app.state.preparer = None
 
     @app.get("/health")
     async def health():
@@ -145,7 +194,14 @@ def create_gateway(settings: Settings | None = None, *, transport=None) -> FastA
 
     @app.get("/workers")
     async def workers():
-        return pool.snapshot()
+        return {
+            **pool.snapshot(),
+            "prefix_preparation": {
+                "capacity": settings.prefix_preparations,
+                "inflight": len(app.state.preparer.tasks) if app.state.preparer else 0,
+            },
+            "prefix_identity": app.state.preparer.encoder.identity if app.state.preparer else None,
+        }
 
     @app.get("/metrics")
     async def metrics():
@@ -175,7 +231,7 @@ def create_gateway(settings: Settings | None = None, *, transport=None) -> FastA
                     await upstream.aclose()
             finally:
                 if lease is not None:
-                    await pool.release(lease)
+                    await pool.release(lease, successful=outcome == "success")
                 elapsed = time.perf_counter() - started
                 completed.labels(outcome).inc()
                 duration.observe(elapsed)
@@ -185,6 +241,7 @@ def create_gateway(settings: Settings | None = None, *, transport=None) -> FastA
                             "request_id": request_id,
                             "worker": lease.worker.name if lease else None,
                             "policy": settings.policy,
+                            "route_decision": lease.decision if lease else None,
                             "outcome": outcome,
                             "queue_seconds": lease.queue_seconds if lease else None,
                             "first_content_seconds": first_seconds,
@@ -218,17 +275,27 @@ def create_gateway(settings: Settings | None = None, *, transport=None) -> FastA
         async def watch_disconnect():
             nonlocal disconnected
             while True:
-                if await request.is_disconnected():
+                # The request body has already been parsed. Wait for the ASGI
+                # disconnect event directly; is_disconnected() uses an AnyIO
+                # cancellation scope that can swallow watcher.cancel() at handoff.
+                message = await request.receive()
+                if message["type"] == "http.disconnect":
                     disconnected = True
                     owner.cancel()
                     return
-                await asyncio.sleep(0.02)
 
         watcher = asyncio.create_task(watch_disconnect())
         handing_off = False
         try:
             async with asyncio.timeout_at(deadline):
-                lease = await pool.acquire()
+                key = None
+                if app.state.preparer:
+                    if sum(len(m.content) for m in body.messages) > 200_000:
+                        outcome = "prefix_input_too_large"
+                        return error(413, outcome)
+                    key = await app.state.preparer.key(body.messages)
+                lease = await pool.acquire(key)
+                route_decisions.labels(lease.decision).inc()
                 queue_delay.observe(lease.queue_seconds)
                 payload = body.model_dump(exclude_none=True)
                 if body.stream:
@@ -245,7 +312,11 @@ def create_gateway(settings: Settings | None = None, *, transport=None) -> FastA
                     if upstream.status_code >= 500:
                         await fail_worker()
                     return error(429 if upstream.status_code == 429 else 502, outcome)
-                headers = {"X-Request-ID": request_id, "X-Worker-ID": lease.worker.name}
+                headers = {
+                    "X-Request-ID": request_id,
+                    "X-Worker-ID": lease.worker.name,
+                    "X-Route-Decision": lease.decision,
+                }
                 if not body.stream:
                     data = json.loads(await upstream.aread())
                     if not isinstance(data, dict) or not data.get("choices") or "error" in data:

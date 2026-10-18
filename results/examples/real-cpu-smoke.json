@@ -1,0 +1,141 @@
+{
+  "schema_version": 1,
+  "label": "real_cpu_compatibility_smoke",
+  "recorded_at_utc": "2026-10-18T14:31:58.450866+00:00",
+  "runtime": {
+    "python": "3.13.6",
+    "system": "Darwin",
+    "machine": "arm64"
+  },
+  "artifacts": {
+    "llama_tag": "b11719",
+    "llama_archive_sha256": "076a2b0d15253078b90bd520a82dc2edc6c17657968878876ba3def3e80f54ba",
+    "server": ".local/llama/llama-b11719/llama-server",
+    "model": ".local/Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
+    "model_repo": "lmstudio-community/Qwen3-4B-Instruct-2507-GGUF",
+    "model_revision": "4edb920b6f14e3b9284d4502a6485103d72cde05",
+    "model_sha256": "8cdb57cbb880d313736a9bc4e3d3d2485f145b5e19cf33783746e753e82641fc",
+    "tokenizer_repo": "Qwen/Qwen3-4B-Instruct-2507",
+    "tokenizer_revision": "cdbee75f17c01a7cc42f958dc650907174af0554",
+    "tokenizer": ".local/tokenizer",
+    "tokenizer_files": {
+      "tokenizer_config.json": "a62ff0a2472a0fa1b8eaabcb57c59b58afa42a22831dc141400b6e0cf2b65ce3",
+      "config.json": "5beea1a4a34c62782bfb2f911c606741a3bab8f92d80a118fa053c28af12e8ba",
+      "tokenizer.json": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4"
+    }
+  },
+  "server_flags": [
+    "--model",
+    ".local/Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
+    "--alias",
+    "qwen-local",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "55828",
+    "--ctx-size",
+    "2048",
+    "--parallel",
+    "1",
+    "--threads",
+    "4",
+    "--device",
+    "none",
+    "--n-gpu-layers",
+    "0",
+    "--no-op-offload",
+    "--jinja",
+    "--slots",
+    "--metrics"
+  ],
+  "prefix_identity": {
+    "model": "qwen-local",
+    "model_revision": "sha256:8cdb57cbb880d313736a9bc4e3d3d2485f145b5e19cf33783746e753e82641fc",
+    "encoding": "huggingface",
+    "tokenizer_fingerprint": "f1e264d1fff741970848e313688ec4090635abb93476dd27de8ebf3d6e75c459",
+    "chat_template_fingerprint": "c87c39da4214fe8fee1f49f4b54bdb5ae1e1cd5aed22a356f3ffedb59964a715",
+    "prefix_tokens": 64
+  },
+  "checks": {
+    "tokenization_checks": [
+      {
+        "token_ids_match": true,
+        "prompt_tokens": 112
+      },
+      {
+        "token_ids_match": true,
+        "prompt_tokens": 33
+      }
+    ],
+    "non_streaming": {
+      "content": "Blue, Red.",
+      "usage": {
+        "completion_tokens": 5,
+        "prompt_tokens": 112,
+        "total_tokens": 117,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "decision": "affinity_miss",
+      "backend_fingerprint": "b11719-5aeac37a3"
+    },
+    "streaming": {
+      "done": true,
+      "content": "Red, Blue.",
+      "usage": {
+        "completion_tokens": 5,
+        "prompt_tokens": 112,
+        "total_tokens": 117,
+        "prompt_tokens_details": {
+          "cached_tokens": 111
+        }
+      },
+      "decision": "affinity_hit"
+    },
+    "cancellation": {
+      "gateway_released": true,
+      "backend_slot_idle": true
+    },
+    "request_after_cancellation_succeeded": true,
+    "gateway_final": {
+      "policy": "prefix_affinity",
+      "capacity_per_worker": 1,
+      "queued": 0,
+      "max_queue": 16,
+      "queue_timeout_seconds": 2,
+      "route_decisions": {
+        "affinity_miss": 1,
+        "affinity_hit": 2,
+        "prefix_too_short": 1
+      },
+      "affinity": {
+        "entries": 1,
+        "capacity": 1024,
+        "ttl_seconds": 60,
+        "max_load_skew": 1
+      },
+      "workers": [
+        {
+          "id": "worker-1",
+          "healthy": true,
+          "inflight": 0,
+          "last_health_check": 1792333917.943051
+        }
+      ],
+      "prefix_preparation": {
+        "capacity": 4,
+        "inflight": 0
+      },
+      "prefix_identity": {
+        "model": "qwen-local",
+        "model_revision": "sha256:8cdb57cbb880d313736a9bc4e3d3d2485f145b5e19cf33783746e753e82641fc",
+        "encoding": "huggingface",
+        "tokenizer_fingerprint": "f1e264d1fff741970848e313688ec4090635abb93476dd27de8ebf3d6e75c459",
+        "chat_template_fingerprint": "c87c39da4214fe8fee1f49f4b54bdb5ae1e1cd5aed22a356f3ffedb59964a715",
+        "prefix_tokens": 64
+      }
+    }
+  },
+  "note": "CPU interface/tokenizer check; GPU cache gains remain unverified."
+}
