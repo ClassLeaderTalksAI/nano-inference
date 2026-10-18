@@ -1,0 +1,304 @@
+{
+  "schema_version": 1,
+  "label": "macos-metal",
+  "started_at_utc": "2026-10-18T14:59:54.697489+00:00",
+  "runtime": {
+    "python": "3.13.6",
+    "system": "Darwin",
+    "machine": "arm64"
+  },
+  "gateway_before": {
+    "policy": "prefix_affinity",
+    "capacity_per_worker": 2,
+    "queued": 0,
+    "max_queue": 4,
+    "queue_timeout_seconds": 2.0,
+    "route_decisions": {
+      "affinity_miss": 11,
+      "affinity_hit": 10,
+      "prefix_too_short": 3
+    },
+    "affinity": {
+      "entries": 10,
+      "capacity": 1024,
+      "ttl_seconds": 60,
+      "max_load_skew": 1
+    },
+    "workers": [
+      {
+        "id": "worker-1",
+        "healthy": true,
+        "inflight": 0,
+        "last_health_check": 1792335594.58563
+      },
+      {
+        "id": "worker-2",
+        "healthy": true,
+        "inflight": 0,
+        "last_health_check": 1792335594.5861208
+      }
+    ],
+    "prefix_preparation": {
+      "capacity": 4,
+      "inflight": 0
+    },
+    "prefix_identity": {
+      "model": "nano-qwen",
+      "model_revision": "50d427756c6b1b2fe0c0a10f67fbda1fc8e82c1b",
+      "encoding": "huggingface",
+      "tokenizer_fingerprint": "f1e264d1fff741970848e313688ec4090635abb93476dd27de8ebf3d6e75c459",
+      "chat_template_fingerprint": "05991410a4bad1a587959aa5c8901f699afc639540f931afd8ba2b359e4368a9",
+      "prefix_tokens": 64
+    }
+  },
+  "gateway_after": {
+    "policy": "prefix_affinity",
+    "capacity_per_worker": 2,
+    "queued": 0,
+    "max_queue": 4,
+    "queue_timeout_seconds": 2.0,
+    "route_decisions": {
+      "affinity_miss": 11,
+      "affinity_hit": 10,
+      "prefix_too_short": 7
+    },
+    "affinity": {
+      "entries": 10,
+      "capacity": 1024,
+      "ttl_seconds": 60,
+      "max_load_skew": 1
+    },
+    "workers": [
+      {
+        "id": "worker-1",
+        "healthy": true,
+        "inflight": 0,
+        "last_health_check": 1792335599.2780669
+      },
+      {
+        "id": "worker-2",
+        "healthy": true,
+        "inflight": 0,
+        "last_health_check": 1792335599.277544
+      }
+    ],
+    "prefix_preparation": {
+      "capacity": 4,
+      "inflight": 0
+    },
+    "prefix_identity": {
+      "model": "nano-qwen",
+      "model_revision": "50d427756c6b1b2fe0c0a10f67fbda1fc8e82c1b",
+      "encoding": "huggingface",
+      "tokenizer_fingerprint": "f1e264d1fff741970848e313688ec4090635abb93476dd27de8ebf3d6e75c459",
+      "chat_template_fingerprint": "05991410a4bad1a587959aa5c8901f699afc639540f931afd8ba2b359e4368a9",
+      "prefix_tokens": 64
+    }
+  },
+  "config": {
+    "url": "http://127.0.0.1:59476",
+    "model": "nano-qwen",
+    "requests": 12,
+    "concurrency": 4,
+    "rate": 100,
+    "max_outstanding": 32,
+    "max_tokens": 64,
+    "timeout": 60,
+    "slo": 2,
+    "workload": "short",
+    "prefix_groups": 3,
+    "prefix_repetitions": 16
+  },
+  "summary": {
+    "requests": 12,
+    "outcomes": {
+      "rejected": 8,
+      "success": 4
+    },
+    "elapsed_seconds": 4.601268792001065,
+    "successful_requests_per_second": 0.8693254362695955,
+    "output_tokens_per_second": 55.63682792125411,
+    "successful_requests_meeting_ttft_slo_per_second": 0.8693254362695955,
+    "ttft_slo_seconds": 2,
+    "successful_first_content_seconds": {
+      "p50": 0.3591237500004354,
+      "p95": 0.4770977606995984
+    },
+    "successful_latency_seconds": {
+      "p50": 4.5553229585002555,
+      "p95": 4.570200342000044
+    },
+    "max_dispatch_lag_seconds": 0.00211404200126708,
+    "note": "First content is a client observation; content events are not token counts."
+  },
+  "results": [
+    {
+      "index": 0,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 4.523081542,
+      "dispatch_lag_seconds": 5.620800038741436e-05,
+      "first_content_seconds": 0.25166512500072713,
+      "completion_tokens": 64,
+      "content_events": 64,
+      "route_decision": "prefix_too_short",
+      "prompt_tokens": 19,
+      "error_code": null
+    },
+    {
+      "index": 1,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 4.564579292000417,
+      "dispatch_lag_seconds": 0.0014673330006189644,
+      "first_content_seconds": 0.24160054200001468,
+      "completion_tokens": 64,
+      "content_events": 64,
+      "route_decision": "prefix_too_short",
+      "prompt_tokens": 19,
+      "error_code": null
+    },
+    {
+      "index": 2,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 4.546066625000094,
+      "dispatch_lag_seconds": 0.0006721249992551748,
+      "first_content_seconds": 0.46658237500014366,
+      "completion_tokens": 64,
+      "content_events": 64,
+      "route_decision": "prefix_too_short",
+      "prompt_tokens": 19,
+      "error_code": null
+    },
+    {
+      "index": 3,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 4.571192291999978,
+      "dispatch_lag_seconds": 0.0006005420000292361,
+      "first_content_seconds": 0.4789534169995022,
+      "completion_tokens": 64,
+      "content_events": 64,
+      "route_decision": "prefix_too_short",
+      "prompt_tokens": 19,
+      "error_code": null
+    },
+    {
+      "index": 4,
+      "outcome": "rejected",
+      "http_status": 429,
+      "worker": null,
+      "latency_seconds": 2.0048106249996636,
+      "dispatch_lag_seconds": 0.00024074999964796007,
+      "first_content_seconds": null,
+      "completion_tokens": null,
+      "content_events": 0,
+      "route_decision": null,
+      "prompt_tokens": null,
+      "error_code": "queue_timeout"
+    },
+    {
+      "index": 5,
+      "outcome": "rejected",
+      "http_status": 429,
+      "worker": null,
+      "latency_seconds": 2.0090522920017975,
+      "dispatch_lag_seconds": 0.00211404200126708,
+      "first_content_seconds": null,
+      "completion_tokens": null,
+      "content_events": 0,
+      "route_decision": null,
+      "prompt_tokens": null,
+      "error_code": "queue_timeout"
+    },
+    {
+      "index": 6,
+      "outcome": "rejected",
+      "http_status": 429,
+      "worker": null,
+      "latency_seconds": 2.005591875000391,
+      "dispatch_lag_seconds": 0.001580208001541905,
+      "first_content_seconds": null,
+      "completion_tokens": null,
+      "content_events": 0,
+      "route_decision": null,
+      "prompt_tokens": null,
+      "error_code": "queue_timeout"
+    },
+    {
+      "index": 7,
+      "outcome": "rejected",
+      "http_status": 429,
+      "worker": null,
+      "latency_seconds": 2.0086144169999898,
+      "dispatch_lag_seconds": 0.0018347500008530915,
+      "first_content_seconds": null,
+      "completion_tokens": null,
+      "content_events": 0,
+      "route_decision": null,
+      "prompt_tokens": null,
+      "error_code": "queue_timeout"
+    },
+    {
+      "index": 8,
+      "outcome": "rejected",
+      "http_status": 429,
+      "worker": null,
+      "latency_seconds": 0.005363083000702318,
+      "dispatch_lag_seconds": 0.0017331670005660271,
+      "first_content_seconds": null,
+      "completion_tokens": null,
+      "content_events": 0,
+      "route_decision": null,
+      "prompt_tokens": null,
+      "error_code": "queue_full"
+    },
+    {
+      "index": 9,
+      "outcome": "rejected",
+      "http_status": 429,
+      "worker": null,
+      "latency_seconds": 0.004038208000565646,
+      "dispatch_lag_seconds": 0.0012817919996450655,
+      "first_content_seconds": null,
+      "completion_tokens": null,
+      "content_events": 0,
+      "route_decision": null,
+      "prompt_tokens": null,
+      "error_code": "queue_full"
+    },
+    {
+      "index": 10,
+      "outcome": "rejected",
+      "http_status": 429,
+      "worker": null,
+      "latency_seconds": 0.003950332999011152,
+      "dispatch_lag_seconds": 0.00123150000035821,
+      "first_content_seconds": null,
+      "completion_tokens": null,
+      "content_events": 0,
+      "route_decision": null,
+      "prompt_tokens": null,
+      "error_code": "queue_full"
+    },
+    {
+      "index": 11,
+      "outcome": "rejected",
+      "http_status": 429,
+      "worker": null,
+      "latency_seconds": 0.004038916998979403,
+      "dispatch_lag_seconds": 0.0016246670002146857,
+      "first_content_seconds": null,
+      "completion_tokens": null,
+      "content_events": 0,
+      "route_decision": null,
+      "prompt_tokens": null,
+      "error_code": "queue_full"
+    }
+  ]
+}

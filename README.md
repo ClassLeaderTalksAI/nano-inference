@@ -4,11 +4,60 @@
 
 A Python gateway for exploring request routing, streaming, bounded admission,
 failure handling, and performance measurement around independent inference replicas.
-The platform runs on a Mac or Linux CPU with two deterministic simulated workers.
-Prefix affinity and a real-model llama.cpp CPU compatibility check are implemented.
-vLLM integration and real GPU measurements are upcoming milestones.
+Two deployment flavors share the same Python serving platform:
 
-## Run locally
+- **macOS Metal**: native vLLM + vllm-metal + MLX on an Apple Silicon Mac.
+- **Linux CUDA**: the planned RunPod flavor, to be validated after the Mac review.
+
+The simulator and llama.cpp CPU check remain useful development/reference tools.
+
+## Apple Silicon flavor
+
+Target: an Apple Silicon Mac with 32 GB RAM, macOS 15+, and Python 3.12/3.13.
+The prepared runtime has its own Python 3.12 environment. It does not modify the
+application's dependencies or require a system-wide vLLM installation.
+
+```bash
+uv sync --locked --extra dev --extra tokenizer
+uv run python scripts/prepare_metal.py
+uv run --extra tokenizer nano-inference serve --profile configs/macos-metal.json
+```
+
+Preparation downloads the pinned wheels, dependencies and approximately 2.3 GB
+Qwen3-4B-Instruct-2507 MLX 4-bit model into ignored `.local/`. Model files have SHA256
+checks; runtime versions are pinned separately in `requirements/macos-metal.lock`.
+Allow roughly 10 GB free disk for the model, environment and installation caches.
+
+The launcher starts two vLLM workers on localhost ports 8101/8102 and the common
+gateway on port 8000. Both replicas share the Mac's physical GPU and unified memory.
+Use `--workers 1` for a single replica, or `--worker-ports 8111 8112 --port 8001` for
+different ports. Ctrl-C stops the owned service groups, including engine processes.
+
+```bash
+curl -N http://127.0.0.1:8000/v1/chat/completions \
+  -H 'Content-Type: application/json' \
+  -d '{"model":"nano-qwen","messages":[{"role":"user","content":"Name two colors."}],"stream":true,"max_tokens":16}'
+
+uv run nano-inference benchmark --model nano-qwen --requests 12 --concurrency 2 \
+  --workload repeated_prefix --prefix-groups 3 --prefix-repetitions 16 \
+  --max-tokens 16 --label macos-metal --output results/mac-prefix.json
+```
+
+Run the complete check, which starts and stops its own cluster on temporary ports:
+
+```bash
+uv run --extra tokenizer python scripts/smoke_vllm.py --profile configs/macos-metal.json
+```
+
+This checks actual engine tokenization, streaming, prefix-cache token counters,
+cancellation, bounded overload and a worker-process failure/restart. Raw reports go
+under `results/macos-metal/`; local logs go under `.local/logs/`. Mac measurements
+describe this shared Apple GPU, not independent NVIDIA GPU scaling.
+
+See [the Mac flavor review](docs/mac-flavor-review.zh-CN.md) for the architecture,
+current evidence and remaining work before the CUDA flavor.
+
+## Run the simulator
 
 Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/).
 
@@ -57,6 +106,8 @@ Benchmark / client
 | `gateway.py` | Forwarding, cancellation, deadlines, health probes, metrics, request logs |
 | `benchmark.py` | Closed-loop / open-loop workload generation and raw JSON results |
 | `cli.py` | Individual services and local process launcher |
+| `flavors.py` | Shared real-vLLM launcher with hardware/runtime profiles |
+| `engine_metrics.py` | Backend token-cache counters, engine timings and finish reasons |
 
 The gateway is **one process with one event loop**. Worker choice and in-flight
 reservation happen together under a lock. Multiple gateway processes would each
@@ -233,6 +284,15 @@ inputs, authentication, and the full OpenAI API surface are outside this version
 
 The CLI binds to localhost. This is an educational local service; the simulator's
 administration API is intended only for local experiments.
+
+## Runtime boundary
+
+Gateway, admission, routing, prefix identity, health checks, SSE forwarding and
+workload generation are shared. The flavor changes the runtime environment, model
+artifact, device selection and memory limits. `macos-metal.json` is the implemented
+profile; Linux/CUDA host/device selection is a prepared code path with offline tests,
+not a validated cloud deployment. Model/precision differences must stay visible in
+result metadata. See [the updated roadmap](docs/roadmap.md).
 
 ## Test
 

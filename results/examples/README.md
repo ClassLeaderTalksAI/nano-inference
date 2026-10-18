@@ -1,5 +1,8 @@
 # Local simulator verification
 
+These reference batches predate the native vLLM Metal flavor. Current Apple GPU
+verification is recorded separately in [results/macos-metal](../macos-metal/README.md).
+
 These are functional workload checks on macOS arm64 with Python 3.13.6. They use
 deterministic CPU simulators, not model inference. Token counts and delays are
 synthetic; none of these rates are GPU performance claims or policy comparisons.

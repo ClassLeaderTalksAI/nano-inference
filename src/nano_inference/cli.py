@@ -9,6 +9,7 @@ import sys
 import uvicorn
 
 from .benchmark import run_benchmark
+from .flavors import serve_flavor
 from .gateway import Settings, create_gateway
 from .mock_worker import Behavior, create_mock_worker
 
@@ -120,6 +121,19 @@ def main():
     gateway.add_argument(
         "--prefix-tokenizer", help="Prepared local Hugging Face tokenizer directory"
     )
+    serve = commands.add_parser("serve", help="Run the shared platform with a vLLM flavor")
+    serve.add_argument("--profile", default="configs/macos-metal.json")
+    serve.add_argument("--workers", type=int, choices=[1, 2], default=2)
+    serve.add_argument("--port", type=int, default=8000)
+    serve.add_argument("--worker-ports", type=int, nargs="+")
+    serve.add_argument(
+        "--policy",
+        choices=["round_robin", "least_inflight", "prefix_affinity"],
+        default="prefix_affinity",
+    )
+    serve.add_argument("--capacity", type=int, default=2)
+    serve.add_argument("--max-queue", type=int, default=4)
+    serve.add_argument("--request-timeout", type=float, default=60)
     benchmark = commands.add_parser("benchmark")
     benchmark.add_argument("--url", default="http://127.0.0.1:8000")
     benchmark.add_argument("--model", default="nano-model")
@@ -159,6 +173,11 @@ def main():
     elif args.command == "gateway":
         settings = Settings(**{k: v for k, v in vars(args).items() if k not in ("command", "port")})
         uvicorn.run(create_gateway(settings), host="127.0.0.1", port=args.port)
+    elif args.command == "serve":
+        try:
+            asyncio.run(serve_flavor(args))
+        except KeyboardInterrupt:
+            pass
     else:
         report = asyncio.run(
             run_benchmark(**{k: v for k, v in vars(args).items() if k != "command"})

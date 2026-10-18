@@ -1,0 +1,260 @@
+{
+  "schema_version": 1,
+  "label": "macos-metal",
+  "started_at_utc": "2026-10-18T14:59:44.727469+00:00",
+  "runtime": {
+    "python": "3.13.6",
+    "system": "Darwin",
+    "machine": "arm64"
+  },
+  "gateway_before": {
+    "policy": "prefix_affinity",
+    "capacity_per_worker": 2,
+    "queued": 0,
+    "max_queue": 4,
+    "queue_timeout_seconds": 2.0,
+    "route_decisions": {
+      "affinity_miss": 5,
+      "affinity_hit": 10
+    },
+    "affinity": {
+      "entries": 4,
+      "capacity": 1024,
+      "ttl_seconds": 60,
+      "max_load_skew": 1
+    },
+    "workers": [
+      {
+        "id": "worker-1",
+        "healthy": true,
+        "inflight": 0,
+        "last_health_check": 1792335584.741163
+      },
+      {
+        "id": "worker-2",
+        "healthy": true,
+        "inflight": 0,
+        "last_health_check": 1792335584.740875
+      }
+    ],
+    "prefix_preparation": {
+      "capacity": 4,
+      "inflight": 0
+    },
+    "prefix_identity": {
+      "model": "nano-qwen",
+      "model_revision": "50d427756c6b1b2fe0c0a10f67fbda1fc8e82c1b",
+      "encoding": "huggingface",
+      "tokenizer_fingerprint": "f1e264d1fff741970848e313688ec4090635abb93476dd27de8ebf3d6e75c459",
+      "chat_template_fingerprint": "05991410a4bad1a587959aa5c8901f699afc639540f931afd8ba2b359e4368a9",
+      "prefix_tokens": 64
+    }
+  },
+  "gateway_after": {
+    "policy": "prefix_affinity",
+    "capacity_per_worker": 2,
+    "queued": 0,
+    "max_queue": 4,
+    "queue_timeout_seconds": 2.0,
+    "route_decisions": {
+      "affinity_miss": 11,
+      "affinity_hit": 10,
+      "prefix_too_short": 3
+    },
+    "affinity": {
+      "entries": 10,
+      "capacity": 1024,
+      "ttl_seconds": 60,
+      "max_load_skew": 1
+    },
+    "workers": [
+      {
+        "id": "worker-1",
+        "healthy": true,
+        "inflight": 0,
+        "last_health_check": 1792335594.58563
+      },
+      {
+        "id": "worker-2",
+        "healthy": true,
+        "inflight": 0,
+        "last_health_check": 1792335594.5861208
+      }
+    ],
+    "prefix_preparation": {
+      "capacity": 4,
+      "inflight": 0
+    },
+    "prefix_identity": {
+      "model": "nano-qwen",
+      "model_revision": "50d427756c6b1b2fe0c0a10f67fbda1fc8e82c1b",
+      "encoding": "huggingface",
+      "tokenizer_fingerprint": "f1e264d1fff741970848e313688ec4090635abb93476dd27de8ebf3d6e75c459",
+      "chat_template_fingerprint": "05991410a4bad1a587959aa5c8901f699afc639540f931afd8ba2b359e4368a9",
+      "prefix_tokens": 64
+    }
+  },
+  "config": {
+    "url": "http://127.0.0.1:59476",
+    "model": "nano-qwen",
+    "requests": 9,
+    "concurrency": 4,
+    "rate": null,
+    "max_outstanding": 32,
+    "max_tokens": 16,
+    "timeout": 60,
+    "slo": 2,
+    "workload": "mixed",
+    "prefix_groups": 3,
+    "prefix_repetitions": 16
+  },
+  "summary": {
+    "requests": 9,
+    "outcomes": {
+      "success": 9
+    },
+    "elapsed_seconds": 9.927413707999222,
+    "successful_requests_per_second": 0.9065805319212256,
+    "output_tokens_per_second": 8.461418297931438,
+    "successful_requests_meeting_ttft_slo_per_second": 0.604387021280817,
+    "ttft_slo_seconds": 2,
+    "successful_first_content_seconds": {
+      "p50": 1.1317325830004847,
+      "p95": 5.1864781663996835
+    },
+    "successful_latency_seconds": {
+      "p50": 3.3703052079999907,
+      "p95": 8.660985516599975
+    },
+    "max_dispatch_lag_seconds": 2.4167000447050668e-05,
+    "note": "First content is a client observation; content events are not token counts."
+  },
+  "results": [
+    {
+      "index": 0,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 0.7793447080002807,
+      "dispatch_lag_seconds": 8.332999641424976e-06,
+      "first_content_seconds": 0.2703355409994401,
+      "completion_tokens": 4,
+      "content_events": 4,
+      "route_decision": "prefix_too_short",
+      "prompt_tokens": 18,
+      "error_code": null
+    },
+    {
+      "index": 1,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 5.999237707999782,
+      "dispatch_lag_seconds": 4.749999789055437e-06,
+      "first_content_seconds": 0.9274536249995435,
+      "completion_tokens": 8,
+      "content_events": 8,
+      "route_decision": "affinity_miss",
+      "prompt_tokens": 173,
+      "error_code": null
+    },
+    {
+      "index": 2,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 9.482863082999756,
+      "dispatch_lag_seconds": 5.249999958323315e-06,
+      "first_content_seconds": 5.385867666000195,
+      "completion_tokens": 16,
+      "content_events": 16,
+      "route_decision": "affinity_miss",
+      "prompt_tokens": 653,
+      "error_code": null
+    },
+    {
+      "index": 3,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 0.8794111249990237,
+      "dispatch_lag_seconds": 3.457998900557868e-06,
+      "first_content_seconds": 0.5734275409995462,
+      "completion_tokens": 4,
+      "content_events": 4,
+      "route_decision": "prefix_too_short",
+      "prompt_tokens": 18,
+      "error_code": null
+    },
+    {
+      "index": 4,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 5.5419086670008255,
+      "dispatch_lag_seconds": 1.4792000001762062e-05,
+      "first_content_seconds": 1.2369618749999063,
+      "completion_tokens": 8,
+      "content_events": 8,
+      "route_decision": "affinity_miss",
+      "prompt_tokens": 173,
+      "error_code": null
+    },
+    {
+      "index": 5,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 7.428169167000306,
+      "dispatch_lag_seconds": 2.2707999960402958e-05,
+      "first_content_seconds": 4.887393916998917,
+      "completion_tokens": 16,
+      "content_events": 16,
+      "route_decision": "affinity_miss",
+      "prompt_tokens": 653,
+      "error_code": null
+    },
+    {
+      "index": 6,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 0.5575590839998767,
+      "dispatch_lag_seconds": 2.4167000447050668e-05,
+      "first_content_seconds": 0.2801471250004397,
+      "completion_tokens": 4,
+      "content_events": 4,
+      "route_decision": "prefix_too_short",
+      "prompt_tokens": 18,
+      "error_code": null
+    },
+    {
+      "index": 7,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 1.9871122500007914,
+      "dispatch_lag_seconds": 1.2208000043756329e-05,
+      "first_content_seconds": 1.1317325830004847,
+      "completion_tokens": 8,
+      "content_events": 8,
+      "route_decision": "affinity_miss",
+      "prompt_tokens": 173,
+      "error_code": null
+    },
+    {
+      "index": 8,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 3.3703052079999907,
+      "dispatch_lag_seconds": 1.3208000382292084e-05,
+      "first_content_seconds": 2.8416799160004302,
+      "completion_tokens": 16,
+      "content_events": 16,
+      "route_decision": "affinity_miss",
+      "prompt_tokens": 653,
+      "error_code": null
+    }
+  ]
+}
