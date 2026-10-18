@@ -1,6 +1,9 @@
 # 本地 Mac flavor：实现与审核
 
 当前先完成 Apple Silicon 本地运行，再审核 Linux/CUDA 的 RunPod 部署。
+
+后续已加入多租户队列、成本公平调度、配额、缓存 salt 和本地监控页面；详见
+[多租户与本地监控](multi-tenant.zh-CN.md)。下文的 FIFO 路径描述未启用租户配置时的行为。
 平台代码共用，推理运行时、模型格式、依赖锁和内存参数按 flavor 配置。
 此前的 llama.cpp CPU 验证保留为参考工具；Mac 主运行时采用 vLLM Metal。
 

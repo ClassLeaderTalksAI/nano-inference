@@ -41,6 +41,10 @@ class Lease:
     released: bool = False
     prefix_key: str | None = None
     decision: str = "least_inflight"
+    tenant_id: str | None = None
+    estimated_cost: float = 0
+    reserved_tokens: int = 0
+    reserved_cost: float = 0
 
 
 class WorkerPool:
@@ -76,9 +80,15 @@ class WorkerPool:
         self.affinity_max_skew = affinity_max_skew
         self.decisions: Counter[str] = Counter()
 
-    def _select(self, prefix_key: str | None) -> tuple[Worker, str] | None:
+    def _select(
+        self, prefix_key: str | None, allowed: list[str] | None = None
+    ) -> tuple[Worker, str] | None:
         ordered = self.workers[self.cursor :] + self.workers[: self.cursor]
-        candidates = [w for w in ordered if w.healthy and w.inflight < self.capacity]
+        candidates = [
+            w
+            for w in ordered
+            if w.healthy and w.inflight < self.capacity and (not allowed or w.name in allowed)
+        ]
         if not candidates:
             return None
         worker = (
@@ -141,18 +151,21 @@ class WorkerPool:
 
     async def release(self, lease: Lease, *, successful: bool = False) -> None:
         async with self.condition:
-            if not lease.released:
-                if (
-                    successful
-                    and self.policy == "prefix_affinity"
-                    and lease.prefix_key
-                    and lease.worker.healthy
-                    and lease.worker.generation == lease.generation
-                ):
-                    self.affinity.remember(lease.prefix_key, lease.worker.name, lease.generation)
-                lease.worker.inflight -= 1
-                lease.released = True
-                self.condition.notify_all()
+            self._release(lease, successful)
+            self.condition.notify_all()
+
+    def _release(self, lease, successful):
+        if not lease.released:
+            if (
+                successful
+                and self.policy == "prefix_affinity"
+                and lease.prefix_key
+                and lease.worker.healthy
+                and lease.worker.generation == lease.generation
+            ):
+                self.affinity.remember(lease.prefix_key, lease.worker.name, lease.generation)
+            lease.worker.inflight -= 1
+            lease.released = True
 
     async def set_health(
         self, worker: Worker, healthy: bool, expected_generation: int | None = None

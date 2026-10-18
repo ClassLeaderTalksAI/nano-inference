@@ -28,6 +28,7 @@ class Result:
     route_decision: str | None = None
     prompt_tokens: int | None = None
     error_code: str | None = None
+    tenant: str | None = None
 
 
 def workload_messages(index: int, workload: str, groups: int, repetitions: int) -> list[dict]:
@@ -60,6 +61,7 @@ async def send_request(
     index: int,
     scheduled: float,
     messages: list[dict] | None = None,
+    headers: dict | None = None,
 ):
     dispatched = time.perf_counter()
     result = Result(index, "client_error", dispatch_lag_seconds=dispatched - scheduled)
@@ -67,6 +69,7 @@ async def send_request(
         async with client.stream(
             "POST",
             url.rstrip("/") + "/v1/chat/completions",
+            headers=headers,
             json={
                 "model": model,
                 "messages": messages or workload_messages(index, "short", 1, 1),

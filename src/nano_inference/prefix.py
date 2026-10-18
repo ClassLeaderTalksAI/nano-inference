@@ -60,11 +60,14 @@ class PrefixEncoder:
             return list(json.dumps(data, ensure_ascii=False, separators=(",", ":")).encode())
         return self.tokenizer.apply_chat_template(data, tokenize=True, add_generation_prompt=True)
 
-    def key(self, messages: list[Message]) -> str | None:
+    def prepare(self, messages: list[Message]) -> tuple[str | None, int]:
         ids = self.tokenize(messages)
-        if len(ids) < self.tokens:
-            return None
-        return digest([self.identity, ids[: self.tokens]])
+        key = digest([self.identity, ids[: self.tokens]]) if len(ids) >= self.tokens else None
+        count = len(ids) if self.tokenizer else sum(len(m.content.split()) for m in messages)
+        return key, count
+
+    def key(self, messages: list[Message]) -> str | None:
+        return self.prepare(messages)[0]
 
 
 class PrefixPreparer:
@@ -82,12 +85,18 @@ class PrefixPreparer:
         self.tasks: set[asyncio.Task] = set()
 
     async def key(self, messages: list[Message]) -> str | None:
+        return await self._run(self.encoder.key, messages)
+
+    async def prepare(self, messages: list[Message]) -> tuple[str | None, int]:
+        return await self._run(self.encoder.prepare, messages)
+
+    async def _run(self, function, messages):
         from .routing import AdmissionError
 
         if self.permits.locked():
             raise AdmissionError(429, "prefix_preparation_full")
         await self.permits.acquire()
-        task = asyncio.create_task(asyncio.to_thread(self.encoder.key, messages))
+        task = asyncio.create_task(asyncio.to_thread(function, messages))
         self.tasks.add(task)
 
         def finished(done):

@@ -1,0 +1,11 @@
+# Optional native Prometheus. The built-in /monitor page needs no extra service.
+# Run Prometheus on the host with --config.file=monitoring/prometheus.yml.
+global:
+  scrape_interval: 2s
+scrape_configs:
+  - job_name: nano-gateway
+    static_configs:
+      - targets: ['127.0.0.1:8000']
+  - job_name: vllm-workers
+    static_configs:
+      - targets: ['127.0.0.1:8101', '127.0.0.1:8102']

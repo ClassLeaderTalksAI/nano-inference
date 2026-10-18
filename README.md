@@ -3,7 +3,7 @@
 **Learn LLM inference systems by building a small serving platform.**
 
 A Python gateway for exploring request routing, streaming, bounded admission,
-failure handling, and performance measurement around independent inference replicas.
+failure handling, tenant isolation, and performance measurement around independent inference replicas.
 Two deployment flavors share the same Python serving platform:
 
 - **macOS Metal**: native vLLM + vllm-metal + MLX on an Apple Silicon Mac.
@@ -57,6 +57,42 @@ describe this shared Apple GPU, not independent NVIDIA GPU scaling.
 See [the Mac flavor review](docs/mac-flavor-review.zh-CN.md) for the architecture,
 current evidence and remaining work before the CUDA flavor.
 
+## Multi-tenant serving and local monitoring
+
+The same gateway now supports API-key tenant identity, independent bounded queues,
+RPM/TPM token buckets, tenant concurrency limits and token-cost weighted deficit
+round robin. Scheduling happens before cache-aware worker placement. Both routing
+hints and engine prefix caches are tenant scoped; the gateway owns `cache_salt`.
+
+```bash
+uv run python scripts/prepare_tenants.py
+source .local/tenants.env
+uv run --extra tokenizer nano-inference serve --profile configs/macos-metal.json \
+  --tenant-config configs/tenants.example.json --max-queue 24
+```
+
+Open **http://127.0.0.1:8000/monitor**. This built-in page needs no extra service:
+per-tenant traffic, rejections, queues, quotas and TTFT; per-worker health, native
+KV cache, TTFT and TPOT. Native metrics are marked unavailable for the simulator.
+Gateway `/metrics` remains Prometheus compatible; an optional host scrape config
+is in `monitoring/prometheus.yml`.
+
+In another terminal:
+
+```bash
+source .local/tenants.env
+uv run nano-inference tenant-load --model nano-qwen --requests 30 --rate 5
+```
+
+For a GPU-free demo, replace `serve` with `local --policy prefix_affinity
+--capacity 1 --tenant-config configs/tenants.example.json --max-queue 24` and use
+`tenant-load --model nano-model`. Tenant API keys are generated into ignored
+`.local/tenants.env`; requests use `Authorization: Bearer <key>`.
+
+See [the multi-tenant guide](docs/multi-tenant.zh-CN.md) for configuration, exact
+accounting semantics, PromQL, verified native cache isolation and limitations.
+Request fairness does not guarantee hard latency isolation on a shared GPU.
+
 ## Run the simulator
 
 Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/).
@@ -91,7 +127,7 @@ they do not predict GPU speed or real tokenizer behavior.
 Benchmark / client
         |
   Gateway :8000
-  validation -> bounded FIFO admission -> atomic route + reserve
+  validation -> optional tenant admission + WDRR -> atomic route + reserve
         |                                      |
   simulator A :8101                       simulator B :8102
         \__________ streaming HTTP ____________/
@@ -101,7 +137,10 @@ Benchmark / client
 |---|---|
 | `protocol.py` | Explicit chat request subset and SSE framing/parser |
 | `mock_worker.py` | Deterministic output, delays, HTTP failures, mid-stream errors |
-| `routing.py` | Worker registry, round robin / least in-flight, capacity reservations, FIFO queue |
+| `routing.py` | Worker registry, round robin / least in-flight, capacity reservations, single-tenant FIFO |
+| `tenants.py` | Authenticated identity, RPM/TPM accounting, per-tenant queues, WDRR, worker scopes |
+| `monitoring.py` / `dashboard.html` | Local live dashboard, native metrics polling and bounded labels |
+| `tenant_benchmark.py` | Bounded multi-tenant open-loop workload and per-tenant reports |
 | `prefix.py` | Token-prefix identity, bounded tokenizer work, expiring LRU affinity hints |
 | `gateway.py` | Forwarding, cancellation, deadlines, health probes, metrics, request logs |
 | `benchmark.py` | Closed-loop / open-loop workload generation and raw JSON results |
@@ -137,8 +176,9 @@ serving engine for the tested model/template pair.
 After a request completes successfully, the selected worker becomes the hint's
 home. Later requests prefer that home if healthy, below capacity, and no more than
 `affinity-max-skew` assigned requests busier than the least-loaded eligible worker
-**before assignment**. Otherwise they use the less-loaded worker immediately. FIFO
-admission still applies; a request never waits solely for its preferred worker.
+**before assignment**. Otherwise they use the less-loaded worker immediately.
+Admission ordering still applies (single-tenant FIFO or the configured tenant
+scheduler); a request never waits solely for its preferred worker.
 
 Hints are bounded by LRU capacity, expire after their last successful home completion,
 and are cleared on observed worker health transitions. Reads and fallback completions
@@ -192,7 +232,8 @@ uv run nano-inference local --policy round_robin --capacity 2 \
 ```
 
 - `capacity` limits assigned requests per worker, including upstream connection time.
-- Requests wait in a bounded FIFO queue when every healthy worker is full.
+- Without tenant configuration, requests wait in a bounded FIFO queue when every healthy worker is full.
+- With tenant configuration, independent tenant queues are selected by cost-weighted DRR before placement.
 - Queue full or queue deadline exceeded: HTTP 429 with a reason and `Retry-After`.
 - No healthy workers: HTTP 503. `/health` stays live while `/ready` returns 503.
 - Upstream connection/HTTP failure before streaming: HTTP 502; timeout: HTTP 504.

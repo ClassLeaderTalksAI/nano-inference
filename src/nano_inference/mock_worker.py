@@ -20,6 +20,10 @@ class Behavior(BaseModel):
     fail_after_chunks: int | None = Field(default=None, ge=0)
 
 
+class WorkerRequest(ChatRequest):
+    cache_salt: str | None = Field(default=None, max_length=128)
+
+
 def create_mock_worker(name: str = "mock-a", behavior: Behavior | None = None) -> FastAPI:
     app = FastAPI(title=f"nano-inference simulator: {name}")
     app.state.behavior = behavior or Behavior()
@@ -42,7 +46,8 @@ def create_mock_worker(name: str = "mock-a", behavior: Behavior | None = None) -
         return config
 
     @app.post("/v1/chat/completions")
-    async def complete(body: ChatRequest):
+    async def complete(body: WorkerRequest):
+        app.state.last_cache_salt = body.cache_salt
         config = app.state.behavior.model_copy()
         status = config.http_status if config.healthy else 503
         if status != 200:

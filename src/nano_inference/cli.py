@@ -12,6 +12,7 @@ from .benchmark import run_benchmark
 from .flavors import serve_flavor
 from .gateway import Settings, create_gateway
 from .mock_worker import Behavior, create_mock_worker
+from .tenant_benchmark import run_tenant_benchmark
 
 
 def gateway_options(parser):
@@ -30,6 +31,7 @@ def gateway_options(parser):
     parser.add_argument("--affinity-ttl", type=float, default=60)
     parser.add_argument("--affinity-max-skew", type=int, default=1)
     parser.add_argument("--prefix-preparations", type=int, default=4)
+    parser.add_argument("--tenant-config", help="Tenant policy JSON; API keys come from env")
 
 
 def run_local(args):
@@ -67,6 +69,8 @@ def run_local(args):
             *[f"http://127.0.0.1:{p}" for p in args.worker_ports],
         ],
     ]
+    if args.tenant_config:
+        commands[-1].extend(["--tenant-config", args.tenant_config])
     children = []
     stopping = False
 
@@ -122,6 +126,7 @@ def main():
         "--prefix-tokenizer", help="Prepared local Hugging Face tokenizer directory"
     )
     serve = commands.add_parser("serve", help="Run the shared platform with a vLLM flavor")
+    serve.add_argument("--tenant-config", help="Tenant policy JSON; API keys come from env")
     serve.add_argument("--profile", default="configs/macos-metal.json")
     serve.add_argument("--workers", type=int, choices=[1, 2], default=2)
     serve.add_argument("--port", type=int, default=8000)
@@ -153,6 +158,15 @@ def main():
     )
     benchmark.add_argument("--prefix-groups", type=int, default=8)
     benchmark.add_argument("--prefix-repetitions", type=int, default=128)
+    tenant_load = commands.add_parser("tenant-load", help="Open-loop noisy-neighbor demo")
+    tenant_load.add_argument("--url", default="http://127.0.0.1:8000")
+    tenant_load.add_argument("--model", default="nano-model")
+    tenant_load.add_argument("--tenant-config", default="configs/tenants.example.json")
+    tenant_load.add_argument("--requests", type=int, default=30, help="Arrivals per tenant")
+    tenant_load.add_argument("--rate", type=float, default=5, help="Base arrivals/s; batch uses 4x")
+    tenant_load.add_argument("--max-outstanding", type=int, default=64)
+    tenant_load.add_argument("--max-tokens", type=int, default=32)
+    tenant_load.add_argument("--output", default="results/tenants-latest.json")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(name)s %(message)s")
     logging.getLogger("httpx").setLevel(logging.WARNING)
@@ -179,7 +193,6 @@ def main():
         except KeyboardInterrupt:
             pass
     else:
-        report = asyncio.run(
-            run_benchmark(**{k: v for k, v in vars(args).items() if k != "command"})
-        )
+        runner = run_tenant_benchmark if args.command == "tenant-load" else run_benchmark
+        report = asyncio.run(runner(**{k: v for k, v in vars(args).items() if k != "command"}))
         print(json.dumps(report["summary"], indent=2))

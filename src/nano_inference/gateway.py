@@ -17,9 +17,11 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, Response, StreamingResponse
 from prometheus_client import CollectorRegistry, Counter, Gauge, Histogram, generate_latest
 
-from .prefix import PrefixEncoder, PrefixPreparer
+from .monitoring import Monitor
+from .prefix import PrefixEncoder, PrefixPreparer, digest
 from .protocol import ChatRequest, has_content, sse, sse_data
 from .routing import AdmissionError, Lease, Policy, WorkerPool
+from .tenants import TenantConfig, TenantPool
 
 logger = logging.getLogger("nano_inference.requests")
 
@@ -44,6 +46,7 @@ class Settings:
     affinity_capacity: int = 1024
     affinity_ttl: float = 60
     affinity_max_skew: int = 1
+    tenant_config: str | None = None
 
     def __post_init__(self):
         timings = (self.request_timeout, self.health_interval, self.health_timeout)
@@ -51,7 +54,7 @@ class Settings:
             raise ValueError("Timeouts and health interval must be positive")
         if self.prefix_tokens < 1 or self.prefix_preparations < 1 or not self.model_revision:
             raise ValueError("Prefix settings require positive counts and a model revision")
-        if self.policy == "prefix_affinity" and self.model != "nano-model":
+        if (self.policy == "prefix_affinity" or self.tenant_config) and self.model != "nano-model":
             if not self.prefix_tokenizer or self.model_revision == "simulator-v1":
                 raise ValueError(
                     "Real-model affinity requires a local tokenizer and model revision"
@@ -82,7 +85,9 @@ def create_gateway(
     settings: Settings | None = None, *, transport=None, prefix_encoder=None
 ) -> FastAPI:
     settings = settings or Settings()
-    pool = WorkerPool(
+    tenant_config = TenantConfig.load(settings.tenant_config) if settings.tenant_config else None
+    pool_type = TenantPool if tenant_config else WorkerPool
+    pool = pool_type(
         settings.worker_urls,
         settings.policy,
         settings.capacity,
@@ -91,6 +96,7 @@ def create_gateway(
         settings.affinity_capacity,
         settings.affinity_ttl,
         settings.affinity_max_skew,
+        **({"tenants": tenant_config} if tenant_config else {}),
     )
     registry = CollectorRegistry()
     completed = Counter(
@@ -119,8 +125,72 @@ def create_gateway(
         "nano_prefix_preparations", "Running tokenizer preparations", registry=registry
     )
     prefix_inflight.set_function(lambda: len(app.state.preparer.tasks) if app.state.preparer else 0)
+    healthy_metric = Gauge(
+        "nano_worker_healthy", "Worker health state", ["worker"], registry=registry
+    )
     for worker in pool.workers:
+        healthy_metric.labels(worker.name).set_function(lambda w=worker: int(w.healthy))
         active.labels(worker.name).set_function(lambda w=worker: w.inflight)
+
+    tenant_requests = Counter(
+        "nano_tenant_requests_total",
+        "Tenant request lifecycles",
+        ["tenant", "outcome"],
+        registry=registry,
+    )
+    tenant_rejections = Counter(
+        "nano_tenant_rejections_total",
+        "Tenant admission rejections",
+        ["tenant", "reason"],
+        registry=registry,
+    )
+    tenant_tokens = Counter(
+        "nano_tenant_tokens_total",
+        "Final backend usage tokens",
+        ["tenant", "kind"],
+        registry=registry,
+    )
+    tenant_ttft = Histogram(
+        "nano_tenant_first_content_seconds",
+        "Arrival to first content",
+        ["tenant"],
+        registry=registry,
+    )
+    tenant_queue = Histogram(
+        "nano_tenant_queue_seconds", "Tenant admission wait", ["tenant"], registry=registry
+    )
+    tenant_slo = Counter(
+        "nano_tenant_slo_met_total",
+        "Successful streams meeting tenant TTFT SLO",
+        ["tenant"],
+        registry=registry,
+    )
+    tenant_slo_observed = Counter(
+        "nano_tenant_slo_observed_total",
+        "Successful streams with first content",
+        ["tenant"],
+        registry=registry,
+    )
+    for metric, attr in (
+        ("inflight", "inflight"),
+        ("queued", "queued"),
+        ("rpm_remaining", "rpm_remaining"),
+        ("tpm_remaining", "tpm_remaining"),
+        ("estimated_dispatched_cost", "estimated_dispatched_cost"),
+        ("actual_settled_cost", "actual_settled_cost"),
+        ("deficit", "deficit"),
+        ("usage_settlements", "usage_settlements"),
+        ("conservative_settlements", "conservative_settlements"),
+        ("conservative_cost", "conservative_cost"),
+    ):
+        gauge = Gauge("nano_tenant_" + metric, "Tenant " + metric, ["tenant"], registry=registry)
+        if tenant_config:
+            for config in tenant_config.tenants:
+
+                def value(tenant=config.id, field=attr):
+                    return next(t[field] for t in pool.snapshot()["tenants"] if t["id"] == tenant)
+
+                gauge.labels(config.id).set_function(value)
 
     async def probe():
         async def check(worker):
@@ -143,7 +213,7 @@ def create_gateway(
 
     @asynccontextmanager
     async def lifespan(app):
-        if settings.policy == "prefix_affinity":
+        if settings.policy == "prefix_affinity" or tenant_config:
             encoder = prefix_encoder
             if encoder is None:
                 if settings.prefix_tokenizer:
@@ -170,7 +240,8 @@ def create_gateway(
             await probe()
             monitor = asyncio.create_task(health_loop())
             try:
-                yield
+                async with dashboard.lifespan():
+                    yield
             finally:
                 monitor.cancel()
                 with contextlib.suppress(asyncio.CancelledError):
@@ -182,6 +253,10 @@ def create_gateway(
     app.state.pool = pool
     app.state.probe = probe
     app.state.preparer = None
+    app.state.registry = registry
+    dashboard = Monitor(app, pool, registry, settings.model)
+    app.state.dashboard = dashboard
+    dashboard.install()
 
     @app.get("/health")
     async def health():
@@ -209,6 +284,18 @@ def create_gateway(
 
     @app.post("/v1/chat/completions")
     async def chat(body: ChatRequest, request: Request):
+        tenant_id = "default"
+        if tenant_config:
+            try:
+                tenant_id = pool.authenticate(request.headers.get("authorization"))
+            except AdmissionError as exc:
+                rejected.labels(exc.code).inc()
+                completed.labels(exc.code).inc()
+                return JSONResponse(
+                    {"error": {"code": exc.code}},
+                    status_code=exc.status,
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
         if body.model != settings.model:
             return JSONResponse({"error": {"code": "unknown_model"}}, status_code=404)
         started = time.perf_counter()
@@ -231,14 +318,31 @@ def create_gateway(
                     await upstream.aclose()
             finally:
                 if lease is not None:
-                    await pool.release(lease, successful=outcome == "success")
+                    await pool.release(
+                        lease,
+                        successful=outcome == "success",
+                        **({"usage": usage} if tenant_config else {}),
+                    )
                 elapsed = time.perf_counter() - started
                 completed.labels(outcome).inc()
                 duration.observe(elapsed)
+                tenant_requests.labels(tenant_id, outcome).inc()
+                if outcome == "success":
+                    for name, kind in (
+                        ("prompt_tokens", "prompt"),
+                        ("completion_tokens", "output"),
+                    ):
+                        if type(usage.get(name)) is int and usage[name] >= 0:
+                            tenant_tokens.labels(tenant_id, kind).inc(usage[name])
+                    if first_seconds is not None and tenant_config:
+                        tenant_slo_observed.labels(tenant_id).inc()
+                        if first_seconds <= pool.states[tenant_id].config.ttft_slo_seconds:
+                            tenant_slo.labels(tenant_id).inc()
                 logger.info(
                     json.dumps(
                         {
                             "request_id": request_id,
+                            "tenant": tenant_id,
                             "worker": lease.worker.name if lease else None,
                             "policy": settings.policy,
                             "route_decision": lease.decision if lease else None,
@@ -289,15 +393,34 @@ def create_gateway(
         try:
             async with asyncio.timeout_at(deadline):
                 key = None
+                input_tokens = 0
                 if app.state.preparer:
                     if sum(len(m.content) for m in body.messages) > 200_000:
                         outcome = "prefix_input_too_large"
                         return error(413, outcome)
-                    key = await app.state.preparer.key(body.messages)
-                lease = await pool.acquire(key)
+                    if tenant_config:
+                        key, input_tokens = await app.state.preparer.prepare(body.messages)
+                        key = digest([tenant_id, key]) if key is not None else None
+                    else:
+                        key = await app.state.preparer.key(body.messages)
+                lease = await pool.acquire(
+                    key,
+                    **(
+                        {
+                            "tenant": tenant_id,
+                            "input_tokens": input_tokens,
+                            "max_tokens": body.max_tokens,
+                        }
+                        if tenant_config
+                        else {}
+                    ),
+                )
                 route_decisions.labels(lease.decision).inc()
                 queue_delay.observe(lease.queue_seconds)
+                tenant_queue.labels(tenant_id).observe(lease.queue_seconds)
                 payload = body.model_dump(exclude_none=True)
+                if tenant_config:
+                    payload["cache_salt"] = pool.salt(tenant_id)
                 if body.stream:
                     # Ask the backend for exact usage; SSE chunks are not tokenizer tokens.
                     payload["stream_options"] = {"include_usage": True}
@@ -350,6 +473,7 @@ def create_gateway(
                             if has_content(event) and first_seconds is None:
                                 first_seconds = time.perf_counter() - started
                                 first_content.observe(first_seconds)
+                                tenant_ttft.labels(tenant_id).observe(first_seconds)
                             saw_finish |= any(
                                 c.get("finish_reason") is not None for c in event.get("choices", [])
                             )
@@ -381,6 +505,7 @@ def create_gateway(
         except AdmissionError as exc:
             outcome = exc.code
             rejected.labels(exc.code).inc()
+            tenant_rejections.labels(tenant_id, exc.code).inc()
             return error(exc.status, exc.code)
         except asyncio.CancelledError:
             if disconnected:

@@ -1,0 +1,317 @@
+{
+  "checked_at_utc": "2026-10-18T15:32:36.906127+00:00",
+  "runtime": {
+    "python": "3.12.11",
+    "packages": {
+      "vllm": "0.31.0+cpu",
+      "vllm-metal": "0.31.0",
+      "mlx": "0.32.1",
+      "mlx-lm": "0.32.0",
+      "transformers": "5.17.0"
+    },
+    "accelerator": {
+      "device_name": "Apple M1 Pro",
+      "max_recommended_working_set_size": 26800603136,
+      "memory_size": 34359738368,
+      "architecture": "applegpu_g13s",
+      "max_buffer_length": 20100448256,
+      "resource_limit": 499000
+    },
+    "metal_computation": [
+      1.0,
+      4.0,
+      9.0
+    ]
+  },
+  "model": "mlx-community/Qwen3-4B-Instruct-2507-4bit",
+  "model_revision": "50d427756c6b1b2fe0c0a10f67fbda1fc8e82c1b",
+  "worker_count": 1,
+  "cache_isolation_checks": [
+    {
+      "tenant": "interactive",
+      "worker": "worker-1",
+      "route_decision": "affinity_miss",
+      "usage": {
+        "prompt_tokens": 308,
+        "total_tokens": 313,
+        "completion_tokens": 5,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": null
+      },
+      "cache": {
+        "hit_tokens": 0.0,
+        "queried_tokens": 308.0,
+        "token_hit_ratio": 0.0
+      }
+    },
+    {
+      "tenant": "interactive",
+      "worker": "worker-1",
+      "route_decision": "affinity_hit",
+      "usage": {
+        "prompt_tokens": 308,
+        "total_tokens": 313,
+        "completion_tokens": 5,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": null
+      },
+      "cache": {
+        "hit_tokens": 304.0,
+        "queried_tokens": 308.0,
+        "token_hit_ratio": 0.987012987012987
+      }
+    },
+    {
+      "tenant": "batch",
+      "worker": "worker-1",
+      "route_decision": "affinity_miss",
+      "usage": {
+        "prompt_tokens": 308,
+        "total_tokens": 313,
+        "completion_tokens": 5,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": null
+      },
+      "cache": {
+        "hit_tokens": 0.0,
+        "queried_tokens": 308.0,
+        "token_hit_ratio": 0.0
+      }
+    },
+    {
+      "tenant": "batch",
+      "worker": "worker-1",
+      "route_decision": "affinity_hit",
+      "usage": {
+        "prompt_tokens": 308,
+        "total_tokens": 313,
+        "completion_tokens": 5,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": null
+      },
+      "cache": {
+        "hit_tokens": 304.0,
+        "queried_tokens": 308.0,
+        "token_hit_ratio": 0.987012987012987
+      }
+    }
+  ],
+  "operator_snapshot": {
+    "sampled_at": 1792337553.20293,
+    "uptime_seconds": 4.137492292000388,
+    "model": "nano-qwen",
+    "simulated": false,
+    "pool": {
+      "policy": "prefix_affinity",
+      "capacity_per_worker": 2,
+      "queued": 0,
+      "max_queue": 24,
+      "queue_timeout_seconds": 2.0,
+      "route_decisions": {
+        "affinity_miss": 2,
+        "affinity_hit": 2
+      },
+      "affinity": {
+        "entries": 2,
+        "capacity": 1024,
+        "ttl_seconds": 60,
+        "max_load_skew": 1
+      },
+      "workers": [
+        {
+          "id": "worker-1",
+          "healthy": true,
+          "inflight": 0,
+          "last_health_check": 1792337553.0541818
+        }
+      ],
+      "scheduler": "wdrr",
+      "tenants": [
+        {
+          "id": "interactive",
+          "weight": 5,
+          "inflight": 0,
+          "queued": 0,
+          "max_inflight": 2,
+          "max_queue": 8,
+          "rpm_remaining": 600,
+          "tpm_remaining": 100000,
+          "ttft_slo_seconds": 5.0,
+          "deficit": 0,
+          "estimated_dispatched_cost": 648.0,
+          "actual_settled_cost": 636.0,
+          "usage_settlements": 2,
+          "conservative_settlements": 0,
+          "conservative_cost": 0,
+          "workers": null
+        },
+        {
+          "id": "standard",
+          "weight": 3,
+          "inflight": 0,
+          "queued": 0,
+          "max_inflight": 2,
+          "max_queue": 8,
+          "rpm_remaining": 600,
+          "tpm_remaining": 100000,
+          "ttft_slo_seconds": 10.0,
+          "deficit": 0,
+          "estimated_dispatched_cost": 0,
+          "actual_settled_cost": 0,
+          "usage_settlements": 0,
+          "conservative_settlements": 0,
+          "conservative_cost": 0,
+          "workers": null
+        },
+        {
+          "id": "batch",
+          "weight": 1,
+          "inflight": 0,
+          "queued": 0,
+          "max_inflight": 1,
+          "max_queue": 4,
+          "rpm_remaining": 600,
+          "tpm_remaining": 100000,
+          "ttft_slo_seconds": 30.0,
+          "deficit": 0,
+          "estimated_dispatched_cost": 648.0,
+          "actual_settled_cost": 636.0,
+          "usage_settlements": 2,
+          "conservative_settlements": 0,
+          "conservative_cost": 0,
+          "workers": null
+        }
+      ]
+    },
+    "metrics": {
+      "overall": {
+        "outcomes": {
+          "success": 4.0,
+          "invalid_api_key": 1.0
+        }
+      },
+      "tenants": {
+        "interactive": {
+          "outcomes": {
+            "success": 2.0
+          },
+          "prompt_tokens": 616.0,
+          "output_tokens": 10.0,
+          "queue_wait": {
+            "count": 2.0,
+            "mean": 3.585400008887518e-05,
+            "p95_upper_bound": 0.005
+          }
+        },
+        "batch": {
+          "outcomes": {
+            "success": 2.0
+          },
+          "prompt_tokens": 616.0,
+          "output_tokens": 10.0,
+          "queue_wait": {
+            "count": 2.0,
+            "mean": 2.5145500330836512e-05,
+            "p95_upper_bound": 0.005
+          }
+        },
+        "standard": {}
+      }
+    },
+    "engines": {
+      "worker-1": {
+        "available": true,
+        "sampled_at": 1792337552.438802,
+        "values": {
+          "vllm:num_requests_running": 0.0,
+          "vllm:num_requests_waiting": 0.0,
+          "vllm:kv_cache_usage_perc": 0.0,
+          "vllm:prefix_cache_queries_total": 616.0,
+          "vllm:prefix_cache_hits_total": 304.0,
+          "vllm:request_success_total": 2.0,
+          "vllm:time_to_first_token_seconds_count": 2.0,
+          "vllm:time_to_first_token_seconds_sum": 1.0772409439086914,
+          "vllm:request_time_per_output_token_seconds_count": 2.0,
+          "vllm:request_time_per_output_token_seconds_sum": 0.05808697900056359
+        },
+        "finished_by_reason": {
+          "stop": 2.0,
+          "length": 0.0,
+          "abort": 0.0,
+          "error": 0.0,
+          "repetition": 0.0
+        }
+      }
+    }
+  },
+  "workload_summary": {
+    "interactive": {
+      "requests": 6,
+      "outcomes": {
+        "success": 6
+      },
+      "elapsed_seconds": 3.2723391669987905,
+      "successful_requests_per_second": 1.8335507701980873,
+      "output_tokens_per_second": 14.668406161584699,
+      "successful_requests_meeting_ttft_slo_per_second": 1.8335507701980873,
+      "ttft_slo_seconds": 5.0,
+      "successful_first_content_seconds": {
+        "p50": 1.0054862289989615,
+        "p95": 1.5071013332494658
+      },
+      "successful_latency_seconds": {
+        "p50": 1.3146282289990268,
+        "p95": 1.8187389687491304
+      },
+      "max_dispatch_lag_seconds": 0.016420124999058316,
+      "note": "First content is a client observation; content events are not token counts."
+    },
+    "standard": {
+      "requests": 6,
+      "outcomes": {
+        "rejected": 1,
+        "success": 5
+      },
+      "elapsed_seconds": 3.2723391669987905,
+      "successful_requests_per_second": 1.5279589751650728,
+      "output_tokens_per_second": 12.223671801320583,
+      "successful_requests_meeting_ttft_slo_per_second": 1.5279589751650728,
+      "ttft_slo_seconds": 10.0,
+      "successful_first_content_seconds": {
+        "p50": 1.6715696249993925,
+        "p95": 2.0948230829995738
+      },
+      "successful_latency_seconds": {
+        "p50": 1.9800719169998047,
+        "p95": 2.3854607251989366
+      },
+      "max_dispatch_lag_seconds": 0.01664741700005834,
+      "note": "First content is a client observation; content events are not token counts."
+    },
+    "batch": {
+      "requests": 6,
+      "outcomes": {
+        "rejected": 5,
+        "success": 1
+      },
+      "elapsed_seconds": 3.2723391669987905,
+      "successful_requests_per_second": 0.3055917950330146,
+      "output_tokens_per_second": 9.778937441056467,
+      "successful_requests_meeting_ttft_slo_per_second": 0.3055917950330146,
+      "ttft_slo_seconds": 30.0,
+      "successful_first_content_seconds": {
+        "p50": 0.13622154199947545,
+        "p95": 0.13622154199947545
+      },
+      "successful_latency_seconds": {
+        "p50": 1.4878979999994044,
+        "p95": 1.4878979999994044
+      },
+      "max_dispatch_lag_seconds": 0.016177207999135135,
+      "note": "First content is a client observation; content events are not token counts."
+    }
+  },
+  "elapsed_seconds": 32.92601454199939,
+  "ports_closed": true,
+  "note": "One physical Apple GPU. Cache isolation is verified by native token counters; request fairness does not provide hard GPU latency isolation."
+}

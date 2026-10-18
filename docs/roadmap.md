@@ -17,6 +17,7 @@ continuous batching, and KV-cache allocation.
 | 4 — Prefix affinity | Stable token-prefix identity, bounded/expiring affinity hints, load override | Health/capacity always respected; identity includes model revision and chat template |
 | 5 — Local real-model smoke test | A small GGUF model served through llama.cpp | Verify supported request fields, SSE, usage, cancellation; no GPU-performance claims |
 | 6 — Mac Metal flavor | Native vLLM Metal runtime, pinned MLX model and shared platform | Two real local replicas, engine cache/queue metrics, cancellation, overload and restart |
+| 6b — Multi-tenant and monitoring | Identity, quotas, per-tenant queues, WDRR, cache salts, local dashboard | Token-cost fairness; independent admission; native cross-tenant cache counter checks; visible failures |
 | 7 — Linux CUDA flavor | Entire platform on RunPod with pinned CUDA runtime and model | First one GPU, then two independent GPU replicas; repeat the same acceptance checks |
 | 8 — Analysis | Raw data, configuration, plots and documented limitations | Every performance claim traceable to measured runs |
 
@@ -29,6 +30,9 @@ Metal replicas, tokenization/streaming, native cache metrics, cancellation, over
 and worker failure/restart. See [the Mac review](mac-flavor-review.zh-CN.md) and
 `results/macos-metal/verification.json`. The Linux CUDA flavor and formal comparative
 analysis remain pending local-flavor review.
+Milestone 6b is now implemented and validated locally; see [the multi-tenant guide](multi-tenant.zh-CN.md)
+and `results/macos-metal/tenants/`. Local monitoring is built in; a separate Prometheus/Grafana
+service is optional and has not been installed. Formal policy comparisons remain pending.
 CLI and request fields may evolve as real backend integration reveals differences.
 
 ## Model and hardware starting point
@@ -75,7 +79,8 @@ network latency from engine timings.
 
 The first version is a single gateway process, with static worker URLs and local
 state. Prefix hints, mixed/prefix workload generation, the CPU reference check and
-the native Mac flavor are implemented. Token-aware cost models, Grafana, actual CUDA
+the native Mac flavor, tenant token-cost scheduling/quotas, cache salts and local monitoring
+are implemented. Hardware calibration of cost, SLO priority boosts, Grafana, actual CUDA
 deployment and measured cross-GPU performance improvements remain pending. Distributed KV
 storage, prefill/decode disaggregation, autoscaling, Kubernetes, and custom GPU
 kernels are follow-up projects rather than first-version requirements.

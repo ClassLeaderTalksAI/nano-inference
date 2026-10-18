@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>nano-inference · Monitor</title>
+    <style>
+      :root {
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        color: #1b3033;
+        background: #f4f6f5;
+        font-size: 14px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+      }
+      header {
+        padding: 22px 4vw;
+        background: #fff;
+        border-bottom: 1px solid #dce4e1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      h1 {
+        font-size: 21px;
+        margin: 0;
+        letter-spacing: -0.6px;
+      }
+      h1 span {
+        font-weight: 400;
+        color: #718482;
+      }
+      a {
+        color: #166a59;
+        text-decoration: none;
+      }
+      main {
+        max-width: 1380px;
+        margin: auto;
+        padding: 28px 4vw;
+      }
+      h2 {
+        font-size: 16px;
+        margin: 0 0 16px;
+      }
+      .status {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        color: #526761;
+      }
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #249779;
+      }
+      .banner {
+        background: #e6eeeb;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 22px;
+        color: #345950;
+        line-height: 1.6;
+      }
+      .muted,
+      small {
+        color: #728480;
+      }
+      .cards,
+      .charts,
+      .workers {
+        display: grid;
+        gap: 16px;
+        margin-bottom: 26px;
+      }
+      .cards {
+        grid-template-columns: repeat(4, 1fr);
+      }
+      .card,
+      .panel {
+        background: white;
+        border: 1px solid #dce4e1;
+        border-radius: 12px;
+        padding: 20px;
+      }
+      .label {
+        color: #647974;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+      }
+      .value {
+        font-size: 32px;
+        letter-spacing: -1px;
+        font-weight: 600;
+        margin: 8px 0;
+      }
+      .charts {
+        grid-template-columns: 1fr 1fr;
+      }
+      .chart {
+        width: 100%;
+        height: 150px;
+        display: block;
+      }
+      .panel p {
+        margin: 4px 0;
+        font-size: 12px;
+        color: #728480;
+      }
+      .tablewrap {
+        overflow-x: auto;
+        margin-bottom: 26px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        white-space: nowrap;
+      }
+      th,
+      td {
+        padding: 14px 10px;
+        border-bottom: 1px solid #e6ece9;
+        text-align: left;
+        font-size: 13px;
+      }
+      th {
+        font-size: 11px;
+        color: #74837e;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+      }
+      td:first-child {
+        font-weight: 600;
+      }
+      tr:last-child td {
+        border-bottom: 0;
+      }
+      .workers {
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      }
+      .workerhead {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 18px;
+      }
+      .pill {
+        border-radius: 20px;
+        background: #e4f4eb;
+        color: #237553;
+        padding: 4px 9px;
+        font-size: 11px;
+      }
+      .down {
+        background: #fbe6e1;
+        color: #a44731;
+      }
+      .pairs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .pairs strong {
+        display: block;
+        font-size: 20px;
+        margin-top: 5px;
+      }
+      .bar {
+        height: 5px;
+        background: #e4ece7;
+        border-radius: 8px;
+        margin-top: 18px;
+        overflow: hidden;
+      }
+      .bar span {
+        display: block;
+        height: 100%;
+        background: #27866c;
+      }
+      footer {
+        font-size: 12px;
+        color: #74837e;
+        line-height: 1.8;
+        margin: 26px 0;
+      }
+      .empty {
+        padding: 22px;
+        color: #74837e;
+      }
+      #connection.error {
+        color: #b24c31;
+      }
+      @media (max-width: 800px) {
+        .cards {
+          grid-template-columns: 1fr 1fr;
+        }
+        .charts {
+          grid-template-columns: 1fr;
+        }
+        header {
+          gap: 16px;
+          flex-wrap: wrap;
+        }
+        .status {
+          font-size: 12px;
+        }
+        main {
+          padding: 20px;
+        }
+        .value {
+          font-size: 26px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>nano-inference <span>/ monitor</span></h1>
+      <div class="status">
+        <span class="dot" id="dot"></span
+        ><span id="connection">Connecting…</span
+        ><a href="/metrics">Prometheus ↗</a><a href="/docs">API ↗</a>
+      </div>
+    </header>
+    <main>
+      <div class="banner" id="context">Waiting for the gateway snapshot…</div>
+      <section class="cards">
+        <div class="card">
+          <div class="label">Completed successfully</div>
+          <div class="value" id="success">—</div>
+          <small>Since gateway start</small>
+        </div>
+        <div class="card">
+          <div class="label">Rejected / failed / cancelled</div>
+          <div class="value" id="errors">—</div>
+          <small>All observed outcomes included</small>
+        </div>
+        <div class="card">
+          <div class="label">In flight / queued</div>
+          <div class="value" id="load">—</div>
+          <small>Gateway reservations / waiting requests</small>
+        </div>
+        <div class="card">
+          <div class="label">Output tokens / s</div>
+          <div class="value" id="tokens">—</div>
+          <small>Final usage received in latest interval</small>
+        </div>
+      </section>
+      <section class="charts">
+        <div class="panel">
+          <h2>Request completions / s</h2>
+          <canvas id="traffic" class="chart"></canvas>
+          <p>Last 4 minutes · success + other lifecycle outcomes</p>
+        </div>
+        <div class="panel">
+          <h2>Waiting at the gateway</h2>
+          <canvas id="queue" class="chart"></canvas>
+          <p>Last 4 minutes · requests, sampled every 2 seconds</p>
+        </div>
+      </section>
+      <section class="panel tablewrap">
+        <h2>Tenant admission &amp; fairness</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Tenant / weight</th>
+              <th>Active / limit</th>
+              <th>Queue / limit</th>
+              <th>Success / other</th>
+              <th>RPM / TPM left</th>
+              <th>TTFT mean / p95 ≤</th>
+              <th>SLO met</th>
+              <th>Settled cost</th>
+            </tr>
+          </thead>
+          <tbody id="tenants"></tbody>
+        </table>
+        <p>
+          Token-cost fairness uses prompt + 2 × estimated output by default.
+          TTFT p95 is a histogram bucket upper bound; SLO counts successful
+          streams only. Cost is a scheduling proxy, not measured GPU time.
+        </p>
+      </section>
+      <h2>Inference workers</h2>
+      <section id="workers" class="workers"></section>
+      <footer>
+        Local operator view · counters reset on process restart · worker metrics
+        refresh every 2 seconds.<br />Native KV cache ratio counts cached
+        tokens, not requests. Missing native metrics are shown as unavailable.
+        Gateway fairness controls dispatch; shared GPU execution can still
+        interfere across tenants.
+      </footer>
+    </main>
+    <script>
+      const el = (id) => document.getElementById(id),
+        fmt = (n, d = 0) =>
+          n == null
+            ? "—"
+            : Number(n).toLocaleString(undefined, { maximumFractionDigits: d }),
+        ms = (n) => (n == null ? "—" : fmt(n * 1000, 0) + " ms");
+      const history = { traffic: [], queue: [] };
+      let previous = null;
+      function node(tag, text, cls) {
+        const n = document.createElement(tag);
+        if (text != null) n.textContent = text;
+        if (cls) n.className = cls;
+        return n;
+      }
+      function draw(id, values) {
+        const c = el(id),
+          r = c.getBoundingClientRect(),
+          s = devicePixelRatio || 1;
+        c.width = r.width * s;
+        c.height = r.height * s;
+        const x = c.getContext("2d");
+        x.scale(s, s);
+        const w = r.width,
+          h = r.height,
+          max = Math.max(1, ...values) * 1.15;
+        x.strokeStyle = "#e5ece8";
+        x.fillStyle = "#7c8a85";
+        x.font = "10px system-ui";
+        for (let i = 0; i < 4; i++) {
+          const y = 12 + (i * (h - 28)) / 3;
+          x.beginPath();
+          x.moveTo(32, y);
+          x.lineTo(w, y);
+          x.stroke();
+          x.fillText(fmt((max * (3 - i)) / 3, 1), 0, y + 4);
+        }
+        if (!values.length) return;
+        x.beginPath();
+        values.forEach((v, i) => {
+          const px = 34 + (i * (w - 36)) / 119,
+            py = h - 16 - (v / max) * (h - 28);
+          i ? x.lineTo(px, py) : x.moveTo(px, py);
+        });
+        x.strokeStyle = "#27866c";
+        x.lineWidth = 2;
+        x.stroke();
+      }
+      function update(d) {
+        const m = d.metrics,
+          tot = m.overall.outcomes || {},
+          count = Object.values(tot).reduce((a, b) => a + b, 0),
+          ok = tot.success || 0,
+          output = Object.values(m.tenants).reduce(
+            (a, t) => a + (t.output_tokens || 0),
+            0,
+          );
+        let rate = null,
+          tps = null;
+        if (
+          previous &&
+          d.uptime_seconds > previous.up &&
+          count >= previous.count &&
+          output >= previous.output
+        ) {
+          const dt = d.sampled_at - previous.at;
+          if (dt > 0) {
+            rate = (count - previous.count) / dt;
+            tps = (output - previous.output) / dt;
+          }
+        } else {
+          history.traffic = [];
+          history.queue = [];
+        }
+        previous = { count, output, at: d.sampled_at, up: d.uptime_seconds };
+        el("success").textContent = fmt(ok);
+        el("errors").textContent = fmt(count - ok);
+        el("load").textContent =
+          fmt(d.pool.workers.reduce((a, w) => a + w.inflight, 0)) +
+          " / " +
+          fmt(d.pool.queued);
+        el("tokens").textContent = fmt(tps, 1);
+        el("context").textContent =
+          (d.simulated
+            ? "SIMULATOR · synthetic tokens; no GPU performance claims. "
+            : "vLLM · native engine metrics. ") +
+          d.model +
+          " · " +
+          (d.pool.scheduler || "single-tenant FIFO") +
+          " → " +
+          d.pool.policy +
+          " · uptime " +
+          fmt(d.uptime_seconds) +
+          " s";
+        for (const [id, v] of [
+          ["traffic", rate],
+          ["queue", d.pool.queued],
+        ]) {
+          history[id].push(v || 0);
+          if (history[id].length > 120) history[id].shift();
+          draw(id, history[id]);
+        }
+        const body = el("tenants");
+        body.replaceChildren();
+        const rows = d.pool.tenants || [
+          {
+            id: "default",
+            weight: 1,
+            inflight: d.pool.workers.reduce((a, w) => a + w.inflight, 0),
+            max_inflight: d.pool.workers.length * d.pool.capacity_per_worker,
+            queued: d.pool.queued,
+            max_queue: d.pool.max_queue,
+          },
+        ];
+        for (const t of rows) {
+          const v = m.tenants[t.id] || {},
+            o = v.outcomes || {},
+            n = Object.values(o).reduce((a, b) => a + b, 0),
+            tr = node("tr");
+          const cells = [
+            t.id + " / " + t.weight,
+            fmt(t.inflight) + " / " + fmt(t.max_inflight),
+            fmt(t.queued) + " / " + fmt(t.max_queue),
+            fmt(o.success || 0) + " / " + fmt(n - (o.success || 0)),
+            fmt(t.rpm_remaining) + " / " + fmt(t.tpm_remaining),
+            ms(v.ttft?.mean) + " / " + ms(v.ttft?.p95_upper_bound),
+            fmt(v.slo_met || 0) + " / " + fmt(v.slo_observed || 0),
+            fmt(t.actual_settled_cost),
+          ];
+          for (const text of cells) tr.append(node("td", text));
+          body.append(tr);
+        }
+        const workers = el("workers");
+        workers.replaceChildren();
+        for (const w of d.pool.workers) {
+          const e = d.engines[w.id],
+            v = e?.values || {},
+            card = node("div", null, "panel"),
+            head = node("div", null, "workerhead");
+          head.append(
+            node("strong", w.id),
+            node(
+              "span",
+              w.healthy ? "Healthy" : "Unavailable",
+              "pill" + (w.healthy ? "" : " down"),
+            ),
+          );
+          card.append(head);
+          const pairs = node("div", null, "pairs"),
+            kv = v["vllm:kv_cache_usage_perc"],
+            hits = v["vllm:prefix_cache_hits_total"],
+            queries = v["vllm:prefix_cache_queries_total"];
+          for (const [label, value] of [
+            [
+              "Gateway in flight",
+              fmt(w.inflight) + " / " + d.pool.capacity_per_worker,
+            ],
+            [
+              "Engine running / waiting",
+              e.available
+                ? fmt(v["vllm:num_requests_running"]) +
+                  " / " +
+                  fmt(v["vllm:num_requests_waiting"])
+                : "Unavailable",
+            ],
+            [
+              "Native TTFT mean",
+              v["vllm:time_to_first_token_seconds_count"]
+                ? ms(
+                    v["vllm:time_to_first_token_seconds_sum"] /
+                      v["vllm:time_to_first_token_seconds_count"],
+                  )
+                : "—",
+            ],
+            [
+              "Native TPOT mean",
+              v["vllm:request_time_per_output_token_seconds_count"]
+                ? ms(
+                    v["vllm:request_time_per_output_token_seconds_sum"] /
+                      v["vllm:request_time_per_output_token_seconds_count"],
+                  )
+                : "—",
+            ],
+            ["KV cache use", kv == null ? "—" : fmt(kv * 100, 1) + "%"],
+            [
+              "Cached / queried tokens",
+              queries == null ? "—" : fmt(hits) + " / " + fmt(queries),
+            ],
+          ]) {
+            const pair = node("div", null, "label");
+            pair.append(node("span", label), node("strong", value));
+            pairs.append(pair);
+          }
+          card.append(pairs);
+          const bar = node("div", null, "bar"),
+            fill = node("span");
+          fill.style.width = Math.min(100, Math.max(0, (kv || 0) * 100)) + "%";
+          bar.append(fill);
+          card.append(
+            bar,
+            node(
+              "p",
+              e.available
+                ? "Native metrics · " +
+                    new Date(e.sampled_at * 1000).toLocaleTimeString()
+                : "Native metrics unavailable" +
+                    (d.simulated ? " (expected for simulator)" : ""),
+            ),
+          );
+          workers.append(card);
+        }
+      }
+      async function refresh() {
+        try {
+          const r = await fetch("/monitor/api", { cache: "no-store" });
+          if (!r.ok) throw Error();
+          const d = await r.json();
+          update(d);
+          el("connection").textContent =
+            "Live · " + new Date().toLocaleTimeString();
+          el("connection").className = "";
+          el("dot").style.background = "#249779";
+        } catch {
+          el("connection").textContent =
+            "Disconnected · displayed values are stale";
+          el("connection").className = "error";
+          el("dot").style.background = "#b24c31";
+        } finally {
+          setTimeout(refresh, 2000);
+        }
+      }
+      refresh();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "scheduler": "wdrr",
+  "quantum": 32,
+  "decode_cost": 2,
+  "tenants": [
+    {"id": "interactive", "api_key_env": "NANO_INTERACTIVE_KEY", "weight": 5,
+     "rpm": 600, "tpm": 100000, "max_inflight": 2, "max_queue": 8,
+     "expected_output_tokens": 32, "ttft_slo_seconds": 5},
+    {"id": "standard", "api_key_env": "NANO_STANDARD_KEY", "weight": 3,
+     "rpm": 600, "tpm": 100000, "max_inflight": 2, "max_queue": 8,
+     "expected_output_tokens": 32, "ttft_slo_seconds": 10},
+    {"id": "batch", "api_key_env": "NANO_BATCH_KEY", "weight": 1,
+     "rpm": 600, "tpm": 100000, "max_inflight": 1, "max_queue": 4,
+     "expected_output_tokens": 64, "ttft_slo_seconds": 30}
+  ]
+}
