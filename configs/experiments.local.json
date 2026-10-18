@@ -1,0 +1,6 @@
+{
+  "repeats": 3,
+  "seed": 20261018,
+  "max_outstanding": 128,
+  "max_dispatch_lag_seconds": 0.05
+}

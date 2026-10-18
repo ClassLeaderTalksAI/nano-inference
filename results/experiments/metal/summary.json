@@ -1,0 +1,1786 @@
+{
+  "schema_version": 1,
+  "batch": "metal",
+  "started_at_utc": "2026-10-18T18:54:58.617328+00:00",
+  "metadata": {
+    "git_head": "dcba3809a37f445c65be56a565760648f448a4a6",
+    "working_tree_dirty": true,
+    "python_source_sha256": "49c6a3b1561f96b82576d403bd64c0ef3d21d7cccfcb0b9755a921493b35cc92",
+    "python": "3.13.6",
+    "system": "Darwin",
+    "machine": "arm64"
+  },
+  "runtime": {
+    "environment": {
+      "python": "3.12.11",
+      "packages": {
+        "vllm": "0.31.0+cpu",
+        "vllm-metal": "0.31.0",
+        "mlx": "0.32.1",
+        "mlx-lm": "0.32.0",
+        "transformers": "5.17.0"
+      },
+      "accelerator": {
+        "device_name": "Apple M1 Pro",
+        "max_recommended_working_set_size": 26800603136,
+        "memory_size": 34359738368,
+        "architecture": "applegpu_g13s",
+        "max_buffer_length": 20100448256,
+        "resource_limit": 499000
+      },
+      "metal_computation": [
+        1.0,
+        4.0,
+        9.0
+      ]
+    },
+    "profile": {
+      "flavor": "macos-metal",
+      "runtime_executable": ".local/metal-venv/bin/vllm",
+      "runtime_version": "0.31.0+cpu",
+      "plugin_version": "0.31.0",
+      "model_repo": "mlx-community/Qwen3-4B-Instruct-2507-4bit",
+      "model_revision": "50d427756c6b1b2fe0c0a10f67fbda1fc8e82c1b",
+      "model_path": ".local/metal-model",
+      "model_alias": "nano-qwen",
+      "model_files": {
+        "added_tokens.json": "c0284b582e14987fbd3d5a2cb2bd139084371ed9acbae488829a1c900833c680",
+        "chat_template.jinja": "40c21f34cf67d8c760ef72f8ad3ae5afad514299d4b06e91dd9a8d705af7b541",
+        "config.json": "574349e5a343236546fda55e4744a76e181f534182d7dc60ff1bad7e7a502849",
+        "generation_config.json": "835fffe355c9438e7a25be099b3fccaa98350b83451f9fd2d99512e74f1ade48",
+        "merges.txt": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5",
+        "model.safetensors": "2a73c6c248601ab904e035548abd8e6abb65ea27dcb5f342fb0a8910eb44173f",
+        "model.safetensors.index.json": "388d811b8b7c2608dd04cce1bcb04a8bf715d19b42790894e6d3427ff429a777",
+        "special_tokens_map.json": "76862e765266b85aa9459767e33cbaf13970f327a0e88d1c65846c2ddd3a1ecd",
+        "tokenizer.json": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+        "tokenizer_config.json": "4397cc477eb6d79715ccd2000accd6b3531928f30029665832fa1b255f24d2b9",
+        "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+      },
+      "max_model_len": 2048,
+      "max_num_seqs": 2,
+      "max_num_batched_tokens": 2048,
+      "gpu_memory_utilization": 0.15,
+      "dtype": "float16"
+    },
+    "worker_count": 2,
+    "physical_gpu_shared": true
+  },
+  "config": {
+    "repeats": 3,
+    "seed": 20261018,
+    "max_outstanding": 128,
+    "max_dispatch_lag_seconds": 0.05
+  },
+  "comparisons": [
+    {
+      "case": "tenants",
+      "metric": "successful_first_content_seconds.p95",
+      "tenant": "interactive",
+      "pairs": [
+        {
+          "repeat": 0,
+          "baseline": 5.2426286909994815,
+          "candidate": 1.154996520602799,
+          "improvement_percent": 77.9691336411886,
+          "usable_for_comparison": true
+        },
+        {
+          "repeat": 1,
+          "baseline": 5.225740424951982,
+          "candidate": 1.1512327499034654,
+          "improvement_percent": 77.96995915819826,
+          "usable_for_comparison": true
+        },
+        {
+          "repeat": 2,
+          "baseline": 5.2068537544506395,
+          "candidate": 1.1625686205030432,
+          "improvement_percent": 77.67233966367273,
+          "usable_for_comparison": true
+        }
+      ],
+      "median_improvement_percent": 77.9691336411886,
+      "assessment": "consistent_directional_improvement",
+      "note": "Descriptive paired differences only. Check failures, offered-load SLO attainment and throughput before making a claim; no causal GPU scaling claim."
+    },
+    {
+      "case": "cache",
+      "metric": "successful_first_content_seconds.p50",
+      "tenant": null,
+      "pairs": [
+        {
+          "repeat": 0,
+          "baseline": 2.106285999998363,
+          "candidate": 0.15149845899941283,
+          "improvement_percent": 92.80731776218754,
+          "usable_for_comparison": true
+        },
+        {
+          "repeat": 1,
+          "baseline": 2.1096574160001182,
+          "candidate": 0.15698295800029882,
+          "improvement_percent": 92.55884122181618,
+          "usable_for_comparison": true
+        },
+        {
+          "repeat": 2,
+          "baseline": 2.117049083000893,
+          "candidate": 0.15440729200054193,
+          "improvement_percent": 92.7064850200983,
+          "usable_for_comparison": true
+        }
+      ],
+      "median_improvement_percent": 92.7064850200983,
+      "assessment": "consistent_directional_improvement",
+      "note": "Descriptive paired differences only. Check failures, offered-load SLO attainment and throughput before making a claim; no causal GPU scaling claim."
+    },
+    {
+      "case": "cache_steady",
+      "metric": "successful_first_content_seconds.p50",
+      "tenant": null,
+      "pairs": [
+        {
+          "repeat": 0,
+          "baseline": 0.14200150000033318,
+          "candidate": 0.13762966700232937,
+          "improvement_percent": 3.078723110666826,
+          "usable_for_comparison": true
+        },
+        {
+          "repeat": 1,
+          "baseline": 0.1433204580025631,
+          "candidate": 0.1373259579995647,
+          "improvement_percent": 4.182585017200537,
+          "usable_for_comparison": true
+        },
+        {
+          "repeat": 2,
+          "baseline": 0.13623954099966795,
+          "candidate": 0.1377072089999274,
+          "improvement_percent": -1.077270217948704,
+          "usable_for_comparison": true
+        }
+      ],
+      "median_improvement_percent": 3.078723110666826,
+      "assessment": "mixed_or_small_effect",
+      "note": "Descriptive paired differences only. Check failures, offered-load SLO attainment and throughput before making a claim; no causal GPU scaling claim."
+    }
+  ],
+  "runs": [
+    {
+      "case": "cache",
+      "repeat": 0,
+      "variant": "baseline",
+      "artifact": "cache-0-baseline.json",
+      "summary": {
+        "requests": 3,
+        "outcomes": {
+          "success": 3
+        },
+        "elapsed_seconds": 6.716844124999625,
+        "successful_requests_per_second": 0.44663832361900574,
+        "output_tokens_per_second": 2.2331916180950286,
+        "successful_requests_meeting_ttft_slo_per_second": 0.0,
+        "ttft_slo_seconds": 2,
+        "successful_first_content_seconds": {
+          "p50": 2.106285999998363,
+          "p95": 2.1325764625002193
+        },
+        "successful_latency_seconds": {
+          "p50": 2.2434346249974624,
+          "p95": 2.269388487499964
+        },
+        "max_dispatch_lag_seconds": 0.01620554200053448,
+        "successful_queue_seconds": {
+          "p50": 2.8167e-05,
+          "p95": 3.9604199999999996e-05
+        },
+        "successful_fraction_of_arrivals": 1.0,
+        "ttft_slo_fraction_of_arrivals": 0.0,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 2.1010538333333293,
+        "workers": {
+          "worker-2": 2,
+          "worker-1": 1
+        },
+        "error_codes": {}
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      },
+      "native_cache": {
+        "hit_tokens": 0.0,
+        "queried_tokens": 1794.0,
+        "token_hit_ratio": 0.0
+      },
+      "native_phase_means_seconds": {
+        "time_to_first_token_seconds": 2.079146067301432,
+        "request_prefill_time_seconds": 2.073177444667332,
+        "request_decode_time_seconds": 0.13669923566582534,
+        "request_time_per_output_token_seconds": 0.034174808916456335
+      }
+    },
+    {
+      "case": "cache",
+      "repeat": 0,
+      "variant": "candidate",
+      "artifact": "cache-0-candidate.json",
+      "summary": {
+        "requests": 3,
+        "outcomes": {
+          "success": 3
+        },
+        "elapsed_seconds": 0.962963124999078,
+        "successful_requests_per_second": 3.1153840911643136,
+        "output_tokens_per_second": 15.576920455821568,
+        "successful_requests_meeting_ttft_slo_per_second": 3.1153840911643136,
+        "ttft_slo_seconds": 2,
+        "successful_first_content_seconds": {
+          "p50": 0.15149845899941283,
+          "p95": 0.2444173462019535
+        },
+        "successful_latency_seconds": {
+          "p50": 0.2850332919988432,
+          "p95": 0.3756435298015276
+        },
+        "max_dispatch_lag_seconds": 0.017759375001332955,
+        "successful_queue_seconds": {
+          "p50": 3.2667e-05,
+          "p95": 3.57045e-05
+        },
+        "successful_fraction_of_arrivals": 1.0,
+        "ttft_slo_fraction_of_arrivals": 1.0,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 0.18573772233382138,
+        "workers": {
+          "worker-1": 2,
+          "worker-2": 1
+        },
+        "error_codes": {}
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      },
+      "native_cache": {
+        "hit_tokens": 1776.0,
+        "queried_tokens": 1794.0,
+        "token_hit_ratio": 0.9899665551839465
+      },
+      "native_phase_means_seconds": {
+        "time_to_first_token_seconds": 0.16386842727661133,
+        "request_prefill_time_seconds": 0.1579923889997493,
+        "request_decode_time_seconds": 0.13427344466617797,
+        "request_time_per_output_token_seconds": 0.03356836116654449
+      }
+    },
+    {
+      "case": "cache",
+      "repeat": 1,
+      "variant": "candidate",
+      "artifact": "cache-1-candidate.json",
+      "summary": {
+        "requests": 3,
+        "outcomes": {
+          "success": 3
+        },
+        "elapsed_seconds": 0.9651844580002944,
+        "successful_requests_per_second": 3.1082141606543408,
+        "output_tokens_per_second": 15.541070803271705,
+        "successful_requests_meeting_ttft_slo_per_second": 3.1082141606543408,
+        "ttft_slo_seconds": 2,
+        "successful_first_content_seconds": {
+          "p50": 0.15698295800029882,
+          "p95": 0.24280204579845305
+        },
+        "successful_latency_seconds": {
+          "p50": 0.29178049999973155,
+          "p95": 0.3709323121991474
+        },
+        "max_dispatch_lag_seconds": 0.01625837499886984,
+        "successful_queue_seconds": {
+          "p50": 3.6958e-05,
+          "p95": 4.11214e-05
+        },
+        "successful_fraction_of_arrivals": 1.0,
+        "ttft_slo_fraction_of_arrivals": 1.0,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 0.1869063473325999,
+        "workers": {
+          "worker-1": 2,
+          "worker-2": 1
+        },
+        "error_codes": {}
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      },
+      "native_cache": {
+        "hit_tokens": 1776.0,
+        "queried_tokens": 1794.0,
+        "token_hit_ratio": 0.9899665551839465
+      },
+      "native_phase_means_seconds": {
+        "time_to_first_token_seconds": 0.16568517684936523,
+        "request_prefill_time_seconds": 0.1596534860000247,
+        "request_decode_time_seconds": 0.13378890333357654,
+        "request_time_per_output_token_seconds": 0.033447225833394136
+      }
+    },
+    {
+      "case": "cache",
+      "repeat": 1,
+      "variant": "baseline",
+      "artifact": "cache-1-baseline.json",
+      "summary": {
+        "requests": 3,
+        "outcomes": {
+          "success": 3
+        },
+        "elapsed_seconds": 6.737612708999222,
+        "successful_requests_per_second": 0.44526156809117157,
+        "output_tokens_per_second": 2.2263078404558576,
+        "successful_requests_meeting_ttft_slo_per_second": 0.0,
+        "ttft_slo_seconds": 2,
+        "successful_first_content_seconds": {
+          "p50": 2.1096574160001182,
+          "p95": 2.12865757880063
+        },
+        "successful_latency_seconds": {
+          "p50": 2.244071040997369,
+          "p95": 2.25983547880096
+        },
+        "max_dispatch_lag_seconds": 0.015051541999127949,
+        "successful_queue_seconds": {
+          "p50": 2.9917e-05,
+          "p95": 4.01923e-05
+        },
+        "successful_fraction_of_arrivals": 1.0,
+        "ttft_slo_fraction_of_arrivals": 0.0,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 2.1118161386669576,
+        "workers": {
+          "worker-2": 2,
+          "worker-1": 1
+        },
+        "error_codes": {}
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      },
+      "native_cache": {
+        "hit_tokens": 0.0,
+        "queried_tokens": 1794.0,
+        "token_hit_ratio": 0.0
+      },
+      "native_phase_means_seconds": {
+        "time_to_first_token_seconds": 2.0908544063568115,
+        "request_prefill_time_seconds": 2.083468194666542,
+        "request_decode_time_seconds": 0.13518456933282627,
+        "request_time_per_output_token_seconds": 0.03379614233320657
+      }
+    },
+    {
+      "case": "cache",
+      "repeat": 2,
+      "variant": "baseline",
+      "artifact": "cache-2-baseline.json",
+      "summary": {
+        "requests": 3,
+        "outcomes": {
+          "success": 3
+        },
+        "elapsed_seconds": 6.694988167000702,
+        "successful_requests_per_second": 0.44809638570936783,
+        "output_tokens_per_second": 2.2404819285468394,
+        "successful_requests_meeting_ttft_slo_per_second": 0.0,
+        "ttft_slo_seconds": 2,
+        "successful_first_content_seconds": {
+          "p50": 2.117049083000893,
+          "p95": 2.1257831708015145
+        },
+        "successful_latency_seconds": {
+          "p50": 2.2448488750014803,
+          "p95": 2.2576266250020125
+        },
+        "max_dispatch_lag_seconds": 0.014006541001435835,
+        "successful_queue_seconds": {
+          "p50": 2.9959e-05,
+          "p95": 3.01462e-05
+        },
+        "successful_fraction_of_arrivals": 1.0,
+        "ttft_slo_fraction_of_arrivals": 0.0,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 2.0956763193341126,
+        "workers": {
+          "worker-2": 2,
+          "worker-1": 1
+        },
+        "error_codes": {}
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      },
+      "native_cache": {
+        "hit_tokens": 0.0,
+        "queried_tokens": 1794.0,
+        "token_hit_ratio": 0.0
+      },
+      "native_phase_means_seconds": {
+        "time_to_first_token_seconds": 2.0749194622039795,
+        "request_prefill_time_seconds": 2.066392555333247,
+        "request_decode_time_seconds": 0.13808265299909786,
+        "request_time_per_output_token_seconds": 0.034520663249774465
+      }
+    },
+    {
+      "case": "cache",
+      "repeat": 2,
+      "variant": "candidate",
+      "artifact": "cache-2-candidate.json",
+      "summary": {
+        "requests": 3,
+        "outcomes": {
+          "success": 3
+        },
+        "elapsed_seconds": 0.9671763340011239,
+        "successful_requests_per_second": 3.1018128696235383,
+        "output_tokens_per_second": 15.509064348117692,
+        "successful_requests_meeting_ttft_slo_per_second": 3.1018128696235383,
+        "ttft_slo_seconds": 2,
+        "successful_first_content_seconds": {
+          "p50": 0.15440729200054193,
+          "p95": 0.2397535413994774
+        },
+        "successful_latency_seconds": {
+          "p50": 0.2912811249989318,
+          "p95": 0.36900767469960555
+        },
+        "max_dispatch_lag_seconds": 0.013820500000292668,
+        "successful_queue_seconds": {
+          "p50": 3.3083e-05,
+          "p95": 3.6008e-05
+        },
+        "successful_fraction_of_arrivals": 1.0,
+        "ttft_slo_fraction_of_arrivals": 1.0,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 0.18513197233429915,
+        "workers": {
+          "worker-1": 2,
+          "worker-2": 1
+        },
+        "error_codes": {}
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      },
+      "native_cache": {
+        "hit_tokens": 1776.0,
+        "queried_tokens": 1794.0,
+        "token_hit_ratio": 0.9899665551839465
+      },
+      "native_phase_means_seconds": {
+        "time_to_first_token_seconds": 0.16465441385904947,
+        "request_prefill_time_seconds": 0.15895170800043465,
+        "request_decode_time_seconds": 0.1367387916664787,
+        "request_time_per_output_token_seconds": 0.034184697916619676
+      }
+    },
+    {
+      "case": "cache_steady",
+      "repeat": 0,
+      "variant": "baseline",
+      "artifact": "cache_steady-0-baseline.json",
+      "summary": {
+        "requests": 3,
+        "outcomes": {
+          "success": 3
+        },
+        "elapsed_seconds": 0.7792074580029293,
+        "successful_requests_per_second": 3.8500658190424066,
+        "output_tokens_per_second": 19.250329095212035,
+        "successful_requests_meeting_ttft_slo_per_second": 3.8500658190424066,
+        "ttft_slo_seconds": 2,
+        "successful_first_content_seconds": {
+          "p50": 0.14200150000033318,
+          "p95": 0.14366196219889388
+        },
+        "successful_latency_seconds": {
+          "p50": 0.2576260409987299,
+          "p95": 0.2609723165995092
+        },
+        "max_dispatch_lag_seconds": 0.018254957998578902,
+        "successful_queue_seconds": {
+          "p50": 2.7958e-05,
+          "p95": 3.00208e-05
+        },
+        "successful_fraction_of_arrivals": 1.0,
+        "ttft_slo_fraction_of_arrivals": 1.0,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 0.14037656933336015,
+        "workers": {
+          "worker-1": 2,
+          "worker-2": 1
+        },
+        "error_codes": {}
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      },
+      "native_cache": {
+        "hit_tokens": 1776.0,
+        "queried_tokens": 1794.0,
+        "token_hit_ratio": 0.9899665551839465
+      },
+      "native_phase_means_seconds": {
+        "time_to_first_token_seconds": 0.1192009449005127,
+        "request_prefill_time_seconds": 0.11371615299867699,
+        "request_decode_time_seconds": 0.11906908333427661,
+        "request_time_per_output_token_seconds": 0.029767270833569153
+      }
+    },
+    {
+      "case": "cache_steady",
+      "repeat": 0,
+      "variant": "candidate",
+      "artifact": "cache_steady-0-candidate.json",
+      "summary": {
+        "requests": 3,
+        "outcomes": {
+          "success": 3
+        },
+        "elapsed_seconds": 0.7692147500019928,
+        "successful_requests_per_second": 3.9000812191812857,
+        "output_tokens_per_second": 19.500406095906428,
+        "successful_requests_meeting_ttft_slo_per_second": 3.9000812191812857,
+        "ttft_slo_seconds": 2,
+        "successful_first_content_seconds": {
+          "p50": 0.13762966700232937,
+          "p95": 0.1419994667005085
+        },
+        "successful_latency_seconds": {
+          "p50": 0.2523189170024125,
+          "p95": 0.2575575541992293
+        },
+        "max_dispatch_lag_seconds": 0.015138875001866836,
+        "successful_queue_seconds": {
+          "p50": 3.0667e-05,
+          "p95": 3.1229499999999996e-05
+        },
+        "successful_fraction_of_arrivals": 1.0,
+        "ttft_slo_fraction_of_arrivals": 1.0,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 0.13859874999980093,
+        "workers": {
+          "worker-1": 2,
+          "worker-2": 1
+        },
+        "error_codes": {}
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      },
+      "native_cache": {
+        "hit_tokens": 1776.0,
+        "queried_tokens": 1794.0,
+        "token_hit_ratio": 0.9899665551839465
+      },
+      "native_phase_means_seconds": {
+        "time_to_first_token_seconds": 0.11636106173197429,
+        "request_prefill_time_seconds": 0.11108884766508709,
+        "request_decode_time_seconds": 0.11682263833426987,
+        "request_time_per_output_token_seconds": 0.029205659583567467
+      }
+    },
+    {
+      "case": "cache_steady",
+      "repeat": 1,
+      "variant": "candidate",
+      "artifact": "cache_steady-1-candidate.json",
+      "summary": {
+        "requests": 3,
+        "outcomes": {
+          "success": 3
+        },
+        "elapsed_seconds": 0.7640312080002332,
+        "successful_requests_per_second": 3.926541178667514,
+        "output_tokens_per_second": 19.63270589333757,
+        "successful_requests_meeting_ttft_slo_per_second": 3.926541178667514,
+        "ttft_slo_seconds": 2,
+        "successful_first_content_seconds": {
+          "p50": 0.1373259579995647,
+          "p95": 0.13749564580175502
+        },
+        "successful_latency_seconds": {
+          "p50": 0.2503186670001014,
+          "p95": 0.2553814298003999
+        },
+        "max_dispatch_lag_seconds": 0.01471254200077965,
+        "successful_queue_seconds": {
+          "p50": 3.3208e-05,
+          "p95": 5.4582999999999996e-05
+        },
+        "successful_fraction_of_arrivals": 1.0,
+        "ttft_slo_fraction_of_arrivals": 1.0,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 0.13708345799993063,
+        "workers": {
+          "worker-1": 2,
+          "worker-2": 1
+        },
+        "error_codes": {}
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      },
+      "native_cache": {
+        "hit_tokens": 1776.0,
+        "queried_tokens": 1794.0,
+        "token_hit_ratio": 0.9899665551839465
+      },
+      "native_phase_means_seconds": {
+        "time_to_first_token_seconds": 0.11623144149780273,
+        "request_prefill_time_seconds": 0.1108512636674277,
+        "request_decode_time_seconds": 0.11638648633258224,
+        "request_time_per_output_token_seconds": 0.02909662158314556
+      }
+    },
+    {
+      "case": "cache_steady",
+      "repeat": 1,
+      "variant": "baseline",
+      "artifact": "cache_steady-1-baseline.json",
+      "summary": {
+        "requests": 3,
+        "outcomes": {
+          "success": 3
+        },
+        "elapsed_seconds": 0.8244421250019514,
+        "successful_requests_per_second": 3.6388242534221544,
+        "output_tokens_per_second": 18.19412126711077,
+        "successful_requests_meeting_ttft_slo_per_second": 3.6388242534221544,
+        "ttft_slo_seconds": 2,
+        "successful_first_content_seconds": {
+          "p50": 0.1433204580025631,
+          "p95": 0.14594789640104863
+        },
+        "successful_latency_seconds": {
+          "p50": 0.2724070840013155,
+          "p95": 0.2758148584016453
+        },
+        "max_dispatch_lag_seconds": 0.013500290999218123,
+        "successful_queue_seconds": {
+          "p50": 2.8209e-05,
+          "p95": 3.35334e-05
+        },
+        "successful_fraction_of_arrivals": 1.0,
+        "ttft_slo_fraction_of_arrivals": 1.0,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 0.14392556933429054,
+        "workers": {
+          "worker-1": 2,
+          "worker-2": 1
+        },
+        "error_codes": {}
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      },
+      "native_cache": {
+        "hit_tokens": 1776.0,
+        "queried_tokens": 1794.0,
+        "token_hit_ratio": 0.9899665551839465
+      },
+      "native_phase_means_seconds": {
+        "time_to_first_token_seconds": 0.12359197934468587,
+        "request_prefill_time_seconds": 0.11800902766723691,
+        "request_decode_time_seconds": 0.12721180599934692,
+        "request_time_per_output_token_seconds": 0.03180295149983673
+      }
+    },
+    {
+      "case": "cache_steady",
+      "repeat": 2,
+      "variant": "baseline",
+      "artifact": "cache_steady-2-baseline.json",
+      "summary": {
+        "requests": 3,
+        "outcomes": {
+          "success": 3
+        },
+        "elapsed_seconds": 0.7745804579972173,
+        "successful_requests_per_second": 3.873064404125178,
+        "output_tokens_per_second": 19.36532202062589,
+        "successful_requests_meeting_ttft_slo_per_second": 3.873064404125178,
+        "ttft_slo_seconds": 2,
+        "successful_first_content_seconds": {
+          "p50": 0.13623954099966795,
+          "p95": 0.1434996547010087
+        },
+        "successful_latency_seconds": {
+          "p50": 0.2534311659983359,
+          "p95": 0.261051016901547
+        },
+        "max_dispatch_lag_seconds": 0.013408417002210626,
+        "successful_queue_seconds": {
+          "p50": 2.5333e-05,
+          "p95": 2.69089e-05
+        },
+        "successful_fraction_of_arrivals": 1.0,
+        "ttft_slo_fraction_of_arrivals": 1.0,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 0.13885951366683003,
+        "workers": {
+          "worker-1": 2,
+          "worker-2": 1
+        },
+        "error_codes": {}
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      },
+      "native_cache": {
+        "hit_tokens": 1776.0,
+        "queried_tokens": 1794.0,
+        "token_hit_ratio": 0.9899665551839465
+      },
+      "native_phase_means_seconds": {
+        "time_to_first_token_seconds": 0.11922502517700195,
+        "request_prefill_time_seconds": 0.11398620866627122,
+        "request_decode_time_seconds": 0.11876170833299209,
+        "request_time_per_output_token_seconds": 0.02969042708324802
+      }
+    },
+    {
+      "case": "cache_steady",
+      "repeat": 2,
+      "variant": "candidate",
+      "artifact": "cache_steady-2-candidate.json",
+      "summary": {
+        "requests": 3,
+        "outcomes": {
+          "success": 3
+        },
+        "elapsed_seconds": 0.7688047909978195,
+        "successful_requests_per_second": 3.902160906289811,
+        "output_tokens_per_second": 19.510804531449054,
+        "successful_requests_meeting_ttft_slo_per_second": 3.902160906289811,
+        "ttft_slo_seconds": 2,
+        "successful_first_content_seconds": {
+          "p50": 0.1377072089999274,
+          "p95": 0.13914135900085967
+        },
+        "successful_latency_seconds": {
+          "p50": 0.2533153330005007,
+          "p95": 0.25602275890232706
+        },
+        "max_dispatch_lag_seconds": 0.016547417002584552,
+        "successful_queue_seconds": {
+          "p50": 3.0875e-05,
+          "p95": 3.39503e-05
+        },
+        "successful_fraction_of_arrivals": 1.0,
+        "ttft_slo_fraction_of_arrivals": 1.0,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 0.13809312533461102,
+        "workers": {
+          "worker-1": 2,
+          "worker-2": 1
+        },
+        "error_codes": {}
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      },
+      "native_cache": {
+        "hit_tokens": 1776.0,
+        "queried_tokens": 1794.0,
+        "token_hit_ratio": 0.9899665551839465
+      },
+      "native_phase_means_seconds": {
+        "time_to_first_token_seconds": 0.11665137608846028,
+        "request_prefill_time_seconds": 0.11110895833310981,
+        "request_decode_time_seconds": 0.1173497363330777,
+        "request_time_per_output_token_seconds": 0.029337434083269425
+      }
+    },
+    {
+      "case": "tenants",
+      "repeat": 0,
+      "variant": "baseline",
+      "artifact": "tenants-0-baseline.json",
+      "summary": {
+        "requests": 12,
+        "outcomes": {
+          "success": 12
+        },
+        "elapsed_seconds": 5.371147040998039,
+        "successful_requests_per_second": 2.234159651263284,
+        "output_tokens_per_second": 34.25711465270369,
+        "successful_requests_meeting_ttft_slo_per_second": 0.744719883754428,
+        "ttft_slo_seconds": 2,
+        "successful_first_content_seconds": {
+          "p50": 3.374724603998402,
+          "p95": 5.1894910909995815
+        },
+        "successful_latency_seconds": {
+          "p50": 3.905217041497963,
+          "p95": 5.26999233315164
+        },
+        "max_dispatch_lag_seconds": 0.014033999999810476,
+        "successful_queue_seconds": {
+          "p50": 3.3014612085,
+          "p95": 5.13059846265
+        },
+        "successful_fraction_of_arrivals": 1.0,
+        "ttft_slo_fraction_of_arrivals": 0.3333333333333333,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 3.164251367832852,
+        "workers": {
+          "worker-1": 12
+        },
+        "error_codes": {}
+      },
+      "tenants": {
+        "interactive": {
+          "requests": 4,
+          "outcomes": {
+            "success": 4
+          },
+          "elapsed_seconds": 5.371147040998039,
+          "successful_requests_per_second": 0.744719883754428,
+          "output_tokens_per_second": 2.978879535017712,
+          "successful_requests_meeting_ttft_slo_per_second": 0.0,
+          "ttft_slo_seconds": 2,
+          "successful_first_content_seconds": {
+            "p50": 5.064904082999419,
+            "p95": 5.2426286909994815
+          },
+          "successful_latency_seconds": {
+            "p50": 5.144219374498789,
+            "p95": 5.323121999952309
+          },
+          "max_dispatch_lag_seconds": 0.0012879999994765967,
+          "successful_queue_seconds": {
+            "p50": 5.006699896000001,
+            "p95": 5.18398442945
+          },
+          "successful_fraction_of_arrivals": 1.0,
+          "ttft_slo_fraction_of_arrivals": 0.0,
+          "note": "First content is a client observation; content events are not token counts.",
+          "first_content_mean_seconds": 5.065985645499495,
+          "workers": {
+            "worker-1": 4
+          },
+          "error_codes": {}
+        },
+        "batch": {
+          "requests": 8,
+          "outcomes": {
+            "success": 8
+          },
+          "elapsed_seconds": 5.371147040998039,
+          "successful_requests_per_second": 1.489439767508856,
+          "output_tokens_per_second": 31.278235117685977,
+          "successful_requests_meeting_ttft_slo_per_second": 0.744719883754428,
+          "ttft_slo_seconds": 2,
+          "successful_first_content_seconds": {
+            "p50": 2.2252094995001244,
+            "p95": 4.042703087498557
+          },
+          "successful_latency_seconds": {
+            "p50": 2.7491886244988564,
+            "p95": 4.568995716448626
+          },
+          "max_dispatch_lag_seconds": 0.014033999999810476,
+          "successful_queue_seconds": {
+            "p50": 2.151049917,
+            "p95": 3.9697976625999996
+          },
+          "successful_fraction_of_arrivals": 1.0,
+          "ttft_slo_fraction_of_arrivals": 0.5,
+          "note": "First content is a client observation; content events are not token counts.",
+          "first_content_mean_seconds": 2.21338422899953,
+          "workers": {
+            "worker-1": 8
+          },
+          "error_codes": {}
+        }
+      },
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      }
+    },
+    {
+      "case": "tenants",
+      "repeat": 0,
+      "variant": "candidate",
+      "artifact": "tenants-0-candidate.json",
+      "summary": {
+        "requests": 12,
+        "outcomes": {
+          "success": 12
+        },
+        "elapsed_seconds": 5.338604042000952,
+        "successful_requests_per_second": 2.2477786150819874,
+        "output_tokens_per_second": 34.465938764590476,
+        "successful_requests_meeting_ttft_slo_per_second": 1.3112041921311592,
+        "ttft_slo_seconds": 2,
+        "successful_first_content_seconds": {
+          "p50": 1.6217465209992952,
+          "p95": 4.480273660599232
+        },
+        "successful_latency_seconds": {
+          "p50": 2.1466241250018356,
+          "p95": 5.011121722950701
+        },
+        "max_dispatch_lag_seconds": 0.013153667001461145,
+        "successful_queue_seconds": {
+          "p50": 1.5482200625,
+          "p95": 4.411312124999999
+        },
+        "successful_fraction_of_arrivals": 1.0,
+        "ttft_slo_fraction_of_arrivals": 0.5833333333333334,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 2.125552534749962,
+        "workers": {
+          "worker-1": 12
+        },
+        "error_codes": {}
+      },
+      "tenants": {
+        "interactive": {
+          "requests": 4,
+          "outcomes": {
+            "success": 4
+          },
+          "elapsed_seconds": 5.338604042000952,
+          "successful_requests_per_second": 0.7492595383606624,
+          "output_tokens_per_second": 2.9970381534426496,
+          "successful_requests_meeting_ttft_slo_per_second": 0.7492595383606624,
+          "ttft_slo_seconds": 2,
+          "successful_first_content_seconds": {
+            "p50": 0.9740371460011374,
+            "p95": 1.154996520602799
+          },
+          "successful_latency_seconds": {
+            "p50": 1.0534891250008513,
+            "p95": 1.2338241124532943
+          },
+          "max_dispatch_lag_seconds": 0.0005337500006135087,
+          "successful_queue_seconds": {
+            "p50": 0.915789979,
+            "p95": 1.09390133755
+          },
+          "successful_fraction_of_arrivals": 1.0,
+          "ttft_slo_fraction_of_arrivals": 1.0,
+          "note": "First content is a client observation; content events are not token counts.",
+          "first_content_mean_seconds": 0.9759055937511221,
+          "workers": {
+            "worker-1": 4
+          },
+          "error_codes": {}
+        },
+        "batch": {
+          "requests": 8,
+          "outcomes": {
+            "success": 8
+          },
+          "elapsed_seconds": 5.338604042000952,
+          "successful_requests_per_second": 1.4985190767213248,
+          "output_tokens_per_second": 31.468900611147824,
+          "successful_requests_meeting_ttft_slo_per_second": 0.5619446537704968,
+          "ttft_slo_seconds": 2,
+          "successful_first_content_seconds": {
+            "p50": 2.7701923540007556,
+            "p95": 4.596756102198742
+          },
+          "successful_latency_seconds": {
+            "p50": 3.29802566699982,
+            "p95": 5.128003081150745
+          },
+          "max_dispatch_lag_seconds": 0.013153667001461145,
+          "successful_queue_seconds": {
+            "p50": 2.6989076880000002,
+            "p95": 4.527490124999999
+          },
+          "successful_fraction_of_arrivals": 1.0,
+          "ttft_slo_fraction_of_arrivals": 0.375,
+          "note": "First content is a client observation; content events are not token counts.",
+          "first_content_mean_seconds": 2.7003760052493817,
+          "workers": {
+            "worker-1": 8
+          },
+          "error_codes": {}
+        }
+      },
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      }
+    },
+    {
+      "case": "tenants",
+      "repeat": 1,
+      "variant": "candidate",
+      "artifact": "tenants-1-candidate.json",
+      "summary": {
+        "requests": 12,
+        "outcomes": {
+          "success": 12
+        },
+        "elapsed_seconds": 5.334352207999473,
+        "successful_requests_per_second": 2.249570244350312,
+        "output_tokens_per_second": 34.49341041337145,
+        "successful_requests_meeting_ttft_slo_per_second": 1.3122493092043486,
+        "ttft_slo_seconds": 2,
+        "successful_first_content_seconds": {
+          "p50": 1.6205793120007002,
+          "p95": 4.472136195350322
+        },
+        "successful_latency_seconds": {
+          "p50": 2.1505516245015315,
+          "p95": 5.00485989129993
+        },
+        "max_dispatch_lag_seconds": 0.013090000000374857,
+        "successful_queue_seconds": {
+          "p50": 1.5460813125000001,
+          "p95": 4.4017481065499995
+        },
+        "successful_fraction_of_arrivals": 1.0,
+        "ttft_slo_fraction_of_arrivals": 0.5833333333333334,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 2.1232335065845596,
+        "workers": {
+          "worker-1": 12
+        },
+        "error_codes": {}
+      },
+      "tenants": {
+        "interactive": {
+          "requests": 4,
+          "outcomes": {
+            "success": 4
+          },
+          "elapsed_seconds": 5.334352207999473,
+          "successful_requests_per_second": 0.7498567481167706,
+          "output_tokens_per_second": 2.9994269924670824,
+          "successful_requests_meeting_ttft_slo_per_second": 0.7498567481167706,
+          "ttft_slo_seconds": 2,
+          "successful_first_content_seconds": {
+            "p50": 0.9710167285011266,
+            "p95": 1.1512327499034654
+          },
+          "successful_latency_seconds": {
+            "p50": 1.051039520501945,
+            "p95": 1.229984766103189
+          },
+          "max_dispatch_lag_seconds": 0.000782000002800487,
+          "successful_queue_seconds": {
+            "p50": 0.9131453755,
+            "p95": 1.09068022325
+          },
+          "successful_fraction_of_arrivals": 1.0,
+          "ttft_slo_fraction_of_arrivals": 1.0,
+          "note": "First content is a client observation; content events are not token counts.",
+          "first_content_mean_seconds": 0.972670676751477,
+          "workers": {
+            "worker-1": 4
+          },
+          "error_codes": {}
+        },
+        "batch": {
+          "requests": 8,
+          "outcomes": {
+            "success": 8
+          },
+          "elapsed_seconds": 5.334352207999473,
+          "successful_requests_per_second": 1.4997134962335412,
+          "output_tokens_per_second": 31.493983420904367,
+          "successful_requests_meeting_ttft_slo_per_second": 0.562392561087578,
+          "ttft_slo_seconds": 2,
+          "successful_first_content_seconds": {
+            "p50": 2.7766256455015537,
+            "p95": 4.588786911949864
+          },
+          "successful_latency_seconds": {
+            "p50": 3.3000006245001714,
+            "p95": 5.122106658100165
+          },
+          "max_dispatch_lag_seconds": 0.013090000000374857,
+          "successful_queue_seconds": {
+            "p50": 2.703880917,
+            "p95": 4.51812809835
+          },
+          "successful_fraction_of_arrivals": 1.0,
+          "ttft_slo_fraction_of_arrivals": 0.375,
+          "note": "First content is a client observation; content events are not token counts.",
+          "first_content_mean_seconds": 2.6985149215011006,
+          "workers": {
+            "worker-1": 8
+          },
+          "error_codes": {}
+        }
+      },
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      }
+    },
+    {
+      "case": "tenants",
+      "repeat": 1,
+      "variant": "baseline",
+      "artifact": "tenants-1-baseline.json",
+      "summary": {
+        "requests": 12,
+        "outcomes": {
+          "success": 12
+        },
+        "elapsed_seconds": 5.351024416002474,
+        "successful_requests_per_second": 2.242561249414873,
+        "output_tokens_per_second": 34.38593915769472,
+        "successful_requests_meeting_ttft_slo_per_second": 0.7475204164716244,
+        "ttft_slo_seconds": 2,
+        "successful_first_content_seconds": {
+          "p50": 3.3621517495012085,
+          "p95": 5.173864558152308
+        },
+        "successful_latency_seconds": {
+          "p50": 3.891597437499513,
+          "p95": 5.251900443452359
+        },
+        "max_dispatch_lag_seconds": 0.014017625002452405,
+        "successful_queue_seconds": {
+          "p50": 3.2849516254999997,
+          "p95": 5.1127790935999995
+        },
+        "successful_fraction_of_arrivals": 1.0,
+        "ttft_slo_fraction_of_arrivals": 0.3333333333333333,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 3.1510928156673494,
+        "workers": {
+          "worker-1": 12
+        },
+        "error_codes": {}
+      },
+      "tenants": {
+        "interactive": {
+          "requests": 4,
+          "outcomes": {
+            "success": 4
+          },
+          "elapsed_seconds": 5.351024416002474,
+          "successful_requests_per_second": 0.7475204164716244,
+          "output_tokens_per_second": 2.9900816658864975,
+          "successful_requests_meeting_ttft_slo_per_second": 0.0,
+          "ttft_slo_seconds": 2,
+          "successful_first_content_seconds": {
+            "p50": 5.051834104000591,
+            "p95": 5.225740424951982
+          },
+          "successful_latency_seconds": {
+            "p50": 5.129729500000394,
+            "p95": 5.303574059852872
+          },
+          "max_dispatch_lag_seconds": 0.003738790997886099,
+          "successful_queue_seconds": {
+            "p50": 4.99013,
+            "p95": 5.1650741768
+          },
+          "successful_fraction_of_arrivals": 1.0,
+          "ttft_slo_fraction_of_arrivals": 0.0,
+          "note": "First content is a client observation; content events are not token counts.",
+          "first_content_mean_seconds": 5.05207451025035,
+          "workers": {
+            "worker-1": 4
+          },
+          "error_codes": {}
+        },
+        "batch": {
+          "requests": 8,
+          "outcomes": {
+            "success": 8
+          },
+          "elapsed_seconds": 5.351024416002474,
+          "successful_requests_per_second": 1.4950408329432487,
+          "output_tokens_per_second": 31.395857491808226,
+          "successful_requests_meeting_ttft_slo_per_second": 0.7475204164716244,
+          "ttft_slo_seconds": 2,
+          "successful_first_content_seconds": {
+            "p50": 2.207714207999743,
+            "p95": 4.030071151850643
+          },
+          "successful_latency_seconds": {
+            "p50": 2.735470208001061,
+            "p95": 4.557221918747928
+          },
+          "max_dispatch_lag_seconds": 0.014017625002452405,
+          "successful_queue_seconds": {
+            "p50": 2.131493146,
+            "p95": 3.9531953521
+          },
+          "successful_fraction_of_arrivals": 1.0,
+          "ttft_slo_fraction_of_arrivals": 0.5,
+          "note": "First content is a client observation; content events are not token counts.",
+          "first_content_mean_seconds": 2.2006019683758495,
+          "workers": {
+            "worker-1": 8
+          },
+          "error_codes": {}
+        }
+      },
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      }
+    },
+    {
+      "case": "tenants",
+      "repeat": 2,
+      "variant": "baseline",
+      "artifact": "tenants-2-baseline.json",
+      "summary": {
+        "requests": 12,
+        "outcomes": {
+          "success": 12
+        },
+        "elapsed_seconds": 5.333971500000189,
+        "successful_requests_per_second": 2.249730805648207,
+        "output_tokens_per_second": 34.49587235327251,
+        "successful_requests_meeting_ttft_slo_per_second": 0.7499102685494023,
+        "ttft_slo_seconds": 2,
+        "successful_first_content_seconds": {
+          "p50": 3.3530760624998948,
+          "p95": 5.154682987650813
+        },
+        "successful_latency_seconds": {
+          "p50": 3.87672235449827,
+          "p95": 5.234251596201102
+        },
+        "max_dispatch_lag_seconds": 0.013407999998889863,
+        "successful_queue_seconds": {
+          "p50": 3.2739043335,
+          "p95": 5.09432728345
+        },
+        "successful_fraction_of_arrivals": 1.0,
+        "ttft_slo_fraction_of_arrivals": 0.3333333333333333,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 3.139088757082694,
+        "workers": {
+          "worker-1": 12
+        },
+        "error_codes": {}
+      },
+      "tenants": {
+        "interactive": {
+          "requests": 4,
+          "outcomes": {
+            "success": 4
+          },
+          "elapsed_seconds": 5.333971500000189,
+          "successful_requests_per_second": 0.7499102685494023,
+          "output_tokens_per_second": 2.9996410741976094,
+          "successful_requests_meeting_ttft_slo_per_second": 0.0,
+          "ttft_slo_seconds": 2,
+          "successful_first_content_seconds": {
+            "p50": 5.031628312499379,
+            "p95": 5.2068537544506395
+          },
+          "successful_latency_seconds": {
+            "p50": 5.110564604499814,
+            "p95": 5.286344162601926
+          },
+          "max_dispatch_lag_seconds": 0.0027680839993990958,
+          "successful_queue_seconds": {
+            "p50": 4.9707165835,
+            "p95": 5.146770683850001
+          },
+          "successful_fraction_of_arrivals": 1.0,
+          "ttft_slo_fraction_of_arrivals": 0.0,
+          "note": "First content is a client observation; content events are not token counts.",
+          "first_content_mean_seconds": 5.032388302249274,
+          "workers": {
+            "worker-1": 4
+          },
+          "error_codes": {}
+        },
+        "batch": {
+          "requests": 8,
+          "outcomes": {
+            "success": 8
+          },
+          "elapsed_seconds": 5.333971500000189,
+          "successful_requests_per_second": 1.4998205370988047,
+          "output_tokens_per_second": 31.496231279074898,
+          "successful_requests_meeting_ttft_slo_per_second": 0.7499102685494023,
+          "ttft_slo_seconds": 2,
+          "successful_first_content_seconds": {
+            "p50": 2.1980036874992948,
+            "p95": 4.012732162499014
+          },
+          "successful_latency_seconds": {
+            "p50": 2.7275873754988424,
+            "p95": 4.536394714698144
+          },
+          "max_dispatch_lag_seconds": 0.013407999998889863,
+          "successful_queue_seconds": {
+            "p50": 2.11734025,
+            "p95": 3.934283883
+          },
+          "successful_fraction_of_arrivals": 1.0,
+          "ttft_slo_fraction_of_arrivals": 0.5,
+          "note": "First content is a client observation; content events are not token counts.",
+          "first_content_mean_seconds": 2.192438984499404,
+          "workers": {
+            "worker-1": 8
+          },
+          "error_codes": {}
+        }
+      },
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      }
+    },
+    {
+      "case": "tenants",
+      "repeat": 2,
+      "variant": "candidate",
+      "artifact": "tenants-2-candidate.json",
+      "summary": {
+        "requests": 12,
+        "outcomes": {
+          "success": 12
+        },
+        "elapsed_seconds": 5.371298165999178,
+        "successful_requests_per_second": 2.2340967917143617,
+        "output_tokens_per_second": 34.25615080628688,
+        "successful_requests_meeting_ttft_slo_per_second": 1.3032231285000444,
+        "ttft_slo_seconds": 2,
+        "successful_first_content_seconds": {
+          "p50": 1.631687895500363,
+          "p95": 4.496507878800003
+        },
+        "successful_latency_seconds": {
+          "p50": 2.155054916498557,
+          "p95": 5.03967858734868
+        },
+        "max_dispatch_lag_seconds": 0.013358374999370426,
+        "successful_queue_seconds": {
+          "p50": 1.5567583335,
+          "p95": 4.42610689115
+        },
+        "successful_fraction_of_arrivals": 1.0,
+        "ttft_slo_fraction_of_arrivals": 0.5833333333333334,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 2.133023975417018,
+        "workers": {
+          "worker-1": 12
+        },
+        "error_codes": {}
+      },
+      "tenants": {
+        "interactive": {
+          "requests": 4,
+          "outcomes": {
+            "success": 4
+          },
+          "elapsed_seconds": 5.371298165999178,
+          "successful_requests_per_second": 0.744698930571454,
+          "output_tokens_per_second": 2.978795722285816,
+          "successful_requests_meeting_ttft_slo_per_second": 0.744698930571454,
+          "ttft_slo_seconds": 2,
+          "successful_first_content_seconds": {
+            "p50": 0.9782181455011596,
+            "p95": 1.1625686205030432
+          },
+          "successful_latency_seconds": {
+            "p50": 1.0607226454994816,
+            "p95": 1.2452529160502308
+          },
+          "max_dispatch_lag_seconds": 0.0006936660029168706,
+          "successful_queue_seconds": {
+            "p50": 0.920672833,
+            "p95": 1.1021070911
+          },
+          "successful_fraction_of_arrivals": 1.0,
+          "ttft_slo_fraction_of_arrivals": 1.0,
+          "note": "First content is a client observation; content events are not token counts.",
+          "first_content_mean_seconds": 0.9805885935011247,
+          "workers": {
+            "worker-1": 4
+          },
+          "error_codes": {}
+        },
+        "batch": {
+          "requests": 8,
+          "outcomes": {
+            "success": 8
+          },
+          "elapsed_seconds": 5.371298165999178,
+          "successful_requests_per_second": 1.489397861142908,
+          "output_tokens_per_second": 31.277355084001066,
+          "successful_requests_meeting_ttft_slo_per_second": 0.5585241979285904,
+          "ttft_slo_seconds": 2,
+          "successful_first_content_seconds": {
+            "p50": 2.779412666499411,
+            "p95": 4.615730195600008
+          },
+          "successful_latency_seconds": {
+            "p50": 3.3071748330003174,
+            "p95": 5.157694903949231
+          },
+          "max_dispatch_lag_seconds": 0.013358374999370426,
+          "successful_queue_seconds": {
+            "p50": 2.70719675,
+            "p95": 4.5457643245499995
+          },
+          "successful_fraction_of_arrivals": 1.0,
+          "ttft_slo_fraction_of_arrivals": 0.375,
+          "note": "First content is a client observation; content events are not token counts.",
+          "first_content_mean_seconds": 2.7092416663749646,
+          "workers": {
+            "worker-1": 8
+          },
+          "error_codes": {}
+        }
+      },
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      }
+    },
+    {
+      "case": "context",
+      "repeat": 0,
+      "variant": "baseline",
+      "artifact": "context-0-baseline.json",
+      "summary": {
+        "requests": 1,
+        "outcomes": {
+          "http_error": 1
+        },
+        "elapsed_seconds": 0.0220305830007419,
+        "successful_requests_per_second": 0.0,
+        "output_tokens_per_second": null,
+        "successful_requests_meeting_ttft_slo_per_second": 0.0,
+        "ttft_slo_seconds": 2,
+        "successful_first_content_seconds": {
+          "p50": null,
+          "p95": null
+        },
+        "successful_latency_seconds": {
+          "p50": null,
+          "p95": null
+        },
+        "max_dispatch_lag_seconds": 0.013170457998057827,
+        "successful_queue_seconds": {
+          "p50": null,
+          "p95": null
+        },
+        "successful_fraction_of_arrivals": 0.0,
+        "ttft_slo_fraction_of_arrivals": 0.0,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": null,
+        "workers": {},
+        "error_codes": {
+          "upstream_http_error": 1
+        }
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      }
+    },
+    {
+      "case": "context",
+      "repeat": 0,
+      "variant": "candidate",
+      "artifact": "context-0-candidate.json",
+      "summary": {
+        "requests": 1,
+        "outcomes": {
+          "http_error": 1
+        },
+        "elapsed_seconds": 0.01815583300049184,
+        "successful_requests_per_second": 0.0,
+        "output_tokens_per_second": null,
+        "successful_requests_meeting_ttft_slo_per_second": 0.0,
+        "ttft_slo_seconds": 2,
+        "successful_first_content_seconds": {
+          "p50": null,
+          "p95": null
+        },
+        "successful_latency_seconds": {
+          "p50": null,
+          "p95": null
+        },
+        "max_dispatch_lag_seconds": 0.013190458001190564,
+        "successful_queue_seconds": {
+          "p50": null,
+          "p95": null
+        },
+        "successful_fraction_of_arrivals": 0.0,
+        "ttft_slo_fraction_of_arrivals": 0.0,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": null,
+        "workers": {},
+        "error_codes": {
+          "context_length_exceeded": 1
+        }
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      }
+    },
+    {
+      "case": "context",
+      "repeat": 1,
+      "variant": "candidate",
+      "artifact": "context-1-candidate.json",
+      "summary": {
+        "requests": 1,
+        "outcomes": {
+          "http_error": 1
+        },
+        "elapsed_seconds": 0.024025208000239218,
+        "successful_requests_per_second": 0.0,
+        "output_tokens_per_second": null,
+        "successful_requests_meeting_ttft_slo_per_second": 0.0,
+        "ttft_slo_seconds": 2,
+        "successful_first_content_seconds": {
+          "p50": null,
+          "p95": null
+        },
+        "successful_latency_seconds": {
+          "p50": null,
+          "p95": null
+        },
+        "max_dispatch_lag_seconds": 0.01488450000033481,
+        "successful_queue_seconds": {
+          "p50": null,
+          "p95": null
+        },
+        "successful_fraction_of_arrivals": 0.0,
+        "ttft_slo_fraction_of_arrivals": 0.0,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": null,
+        "workers": {},
+        "error_codes": {
+          "context_length_exceeded": 1
+        }
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      }
+    },
+    {
+      "case": "context",
+      "repeat": 1,
+      "variant": "baseline",
+      "artifact": "context-1-baseline.json",
+      "summary": {
+        "requests": 1,
+        "outcomes": {
+          "http_error": 1
+        },
+        "elapsed_seconds": 0.020909708000544924,
+        "successful_requests_per_second": 0.0,
+        "output_tokens_per_second": null,
+        "successful_requests_meeting_ttft_slo_per_second": 0.0,
+        "ttft_slo_seconds": 2,
+        "successful_first_content_seconds": {
+          "p50": null,
+          "p95": null
+        },
+        "successful_latency_seconds": {
+          "p50": null,
+          "p95": null
+        },
+        "max_dispatch_lag_seconds": 0.013166000000637723,
+        "successful_queue_seconds": {
+          "p50": null,
+          "p95": null
+        },
+        "successful_fraction_of_arrivals": 0.0,
+        "ttft_slo_fraction_of_arrivals": 0.0,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": null,
+        "workers": {},
+        "error_codes": {
+          "upstream_http_error": 1
+        }
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      }
+    },
+    {
+      "case": "context",
+      "repeat": 2,
+      "variant": "baseline",
+      "artifact": "context-2-baseline.json",
+      "summary": {
+        "requests": 1,
+        "outcomes": {
+          "http_error": 1
+        },
+        "elapsed_seconds": 0.0302017079993675,
+        "successful_requests_per_second": 0.0,
+        "output_tokens_per_second": null,
+        "successful_requests_meeting_ttft_slo_per_second": 0.0,
+        "ttft_slo_seconds": 2,
+        "successful_first_content_seconds": {
+          "p50": null,
+          "p95": null
+        },
+        "successful_latency_seconds": {
+          "p50": null,
+          "p95": null
+        },
+        "max_dispatch_lag_seconds": 0.017590957999345846,
+        "successful_queue_seconds": {
+          "p50": null,
+          "p95": null
+        },
+        "successful_fraction_of_arrivals": 0.0,
+        "ttft_slo_fraction_of_arrivals": 0.0,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": null,
+        "workers": {},
+        "error_codes": {
+          "upstream_http_error": 1
+        }
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      }
+    },
+    {
+      "case": "context",
+      "repeat": 2,
+      "variant": "candidate",
+      "artifact": "context-2-candidate.json",
+      "summary": {
+        "requests": 1,
+        "outcomes": {
+          "http_error": 1
+        },
+        "elapsed_seconds": 0.02048424999884446,
+        "successful_requests_per_second": 0.0,
+        "output_tokens_per_second": null,
+        "successful_requests_meeting_ttft_slo_per_second": 0.0,
+        "ttft_slo_seconds": 2,
+        "successful_first_content_seconds": {
+          "p50": null,
+          "p95": null
+        },
+        "successful_latency_seconds": {
+          "p50": null,
+          "p95": null
+        },
+        "max_dispatch_lag_seconds": 0.01512916700085043,
+        "successful_queue_seconds": {
+          "p50": null,
+          "p95": null
+        },
+        "successful_fraction_of_arrivals": 0.0,
+        "ttft_slo_fraction_of_arrivals": 0.0,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": null,
+        "workers": {},
+        "error_codes": {
+          "context_length_exceeded": 1
+        }
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      }
+    }
+  ],
+  "scope": "Simulator isolates control-plane logic. Metal replicas share one physical Apple GPU. Small local batches do not establish production SLOs or NVIDIA scaling."
+}

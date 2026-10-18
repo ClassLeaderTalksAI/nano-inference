@@ -1,0 +1,1504 @@
+{
+  "case": "overload",
+  "repeat": 2,
+  "variant": "baseline",
+  "backend": "simulator",
+  "changed_knob": {
+    "max_queue": 128
+  },
+  "gateway_settings": {
+    "worker_urls": [
+      "http://127.0.0.1:59000",
+      "http://127.0.0.1:59002"
+    ],
+    "model": "nano-model",
+    "policy": "least_inflight",
+    "capacity": 1,
+    "max_queue": 128,
+    "queue_timeout": 20,
+    "request_timeout": 45,
+    "health_interval": 0.1,
+    "health_timeout": 1,
+    "model_revision": "simulator-v1",
+    "prefix_tokenizer": null,
+    "prefix_tokens": 64,
+    "prefix_preparations": 4,
+    "affinity_capacity": 1024,
+    "affinity_ttl": 60,
+    "affinity_max_skew": 1,
+    "tenant_config": null,
+    "max_model_len": null
+  },
+  "schedule": [
+    {
+      "index": 0,
+      "offset": 0.0,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 1,
+      "offset": 0.0125,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 2,
+      "offset": 0.025,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 3,
+      "offset": 0.0375,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 4,
+      "offset": 0.05,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 5,
+      "offset": 0.0625,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 6,
+      "offset": 0.075,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 7,
+      "offset": 0.0875,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 8,
+      "offset": 0.1,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 9,
+      "offset": 0.1125,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 10,
+      "offset": 0.125,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 11,
+      "offset": 0.1375,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 12,
+      "offset": 0.15,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 13,
+      "offset": 0.1625,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 14,
+      "offset": 0.175,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 15,
+      "offset": 0.1875,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 16,
+      "offset": 0.2,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 17,
+      "offset": 0.2125,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 18,
+      "offset": 0.225,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 19,
+      "offset": 0.2375,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 20,
+      "offset": 0.25,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 21,
+      "offset": 0.2625,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 22,
+      "offset": 0.275,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 23,
+      "offset": 0.2875,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 24,
+      "offset": 0.3,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 25,
+      "offset": 0.3125,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 26,
+      "offset": 0.325,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 27,
+      "offset": 0.3375,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 28,
+      "offset": 0.35,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 29,
+      "offset": 0.3625,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 30,
+      "offset": 0.375,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 31,
+      "offset": 0.3875,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 32,
+      "offset": 0.4,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 33,
+      "offset": 0.4125,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 34,
+      "offset": 0.425,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 35,
+      "offset": 0.4375,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 36,
+      "offset": 0.45,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 37,
+      "offset": 0.4625,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 38,
+      "offset": 0.475,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 39,
+      "offset": 0.4875,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 40,
+      "offset": 0.5,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 41,
+      "offset": 0.5125,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 42,
+      "offset": 0.525,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 43,
+      "offset": 0.5375,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 44,
+      "offset": 0.55,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 45,
+      "offset": 0.5625,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 46,
+      "offset": 0.575,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    },
+    {
+      "index": 47,
+      "offset": 0.5875,
+      "messages": [
+        {
+          "role": "user",
+          "content": "List integers starting at 1, separated by spaces."
+        }
+      ],
+      "max_tokens": 32,
+      "tenant": null
+    }
+  ],
+  "summary": {
+    "requests": 48,
+    "outcomes": {
+      "success": 48
+    },
+    "elapsed_seconds": 3.0467490420014656,
+    "successful_requests_per_second": 15.75449744573249,
+    "output_tokens_per_second": 504.1439182634397,
+    "successful_requests_meeting_ttft_slo_per_second": 1.9693121807165612,
+    "ttft_slo_seconds": 0.25,
+    "successful_first_content_seconds": {
+      "p50": 1.1923472915004822,
+      "p95": 2.2631341460526526
+    },
+    "successful_latency_seconds": {
+      "p50": 1.300463312500142,
+      "p95": 2.3715972397021687
+    },
+    "max_dispatch_lag_seconds": 0.0189887920023466,
+    "successful_queue_seconds": {
+      "p50": 1.1651311875,
+      "p95": 2.24637517885
+    },
+    "successful_fraction_of_arrivals": 1.0,
+    "ttft_slo_fraction_of_arrivals": 0.125,
+    "note": "First content is a client observation; content events are not token counts.",
+    "first_content_mean_seconds": 1.1903802508970027,
+    "workers": {
+      "worker-2": 24,
+      "worker-1": 24
+    },
+    "error_codes": {}
+  },
+  "tenants": {},
+  "quality": {
+    "valid_client_load": true,
+    "flags": [],
+    "max_allowed_dispatch_lag_seconds": 0.05,
+    "statistical_significance": "not_established"
+  },
+  "final_pool": {
+    "policy": "least_inflight",
+    "capacity_per_worker": 1,
+    "queued": 0,
+    "max_queue": 128,
+    "queue_timeout_seconds": 20,
+    "route_decisions": {
+      "least_inflight": 48
+    },
+    "affinity": {
+      "entries": 0,
+      "capacity": 1024,
+      "ttl_seconds": 60,
+      "max_load_skew": 1
+    },
+    "workers": [
+      {
+        "id": "worker-1",
+        "healthy": true,
+        "inflight": 0,
+        "last_health_check": 1792349155.7486598
+      },
+      {
+        "id": "worker-2",
+        "healthy": true,
+        "inflight": 0,
+        "last_health_check": 1792349155.748874
+      }
+    ],
+    "prefix_preparation": {
+      "capacity": 4,
+      "inflight": 0
+    },
+    "prefix_identity": null
+  },
+  "results": [
+    {
+      "index": 0,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 0.13657516700186534,
+      "dispatch_lag_seconds": 0.012945000002218876,
+      "first_content_seconds": 0.02994270800263621,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 0.0,
+      "last_content_seconds": 0.13415549999990617
+    },
+    {
+      "index": 1,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 0.12382795799931046,
+      "dispatch_lag_seconds": 0.0010447499989822973,
+      "first_content_seconds": 0.018757792000542395,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 0.0,
+      "last_content_seconds": 0.12189550000039162
+    },
+    {
+      "index": 2,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 0.2322507079989009,
+      "dispatch_lag_seconds": 0.00045516699901781976,
+      "first_content_seconds": 0.12352737499895738,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 0.108155541,
+      "last_content_seconds": 0.22914687500087894
+    },
+    {
+      "index": 3,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 0.21952229200178408,
+      "dispatch_lag_seconds": 0.0001360830028716009,
+      "first_content_seconds": 0.11110050000206684,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 0.095479291,
+      "last_content_seconds": 0.2168942500029516
+    },
+    {
+      "index": 4,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 0.3561228750004375,
+      "dispatch_lag_seconds": 0.0002176670022890903,
+      "first_content_seconds": 0.21957970800212934,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 0.204123709,
+      "last_content_seconds": 0.35297629200067604
+    },
+    {
+      "index": 5,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 0.3432333330019901,
+      "dispatch_lag_seconds": 7.125000047381036e-05,
+      "first_content_seconds": 0.20716929199988954,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 0.192004041,
+      "last_content_seconds": 0.3408106670030975
+    },
+    {
+      "index": 6,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 0.45479758299916284,
+      "dispatch_lag_seconds": 0.00013204200149630196,
+      "first_content_seconds": 0.3432607079994341,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 0.327681875,
+      "last_content_seconds": 0.451585333001276
+    },
+    {
+      "index": 7,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 0.4423787919986353,
+      "dispatch_lag_seconds": 0.00033983300090767443,
+      "first_content_seconds": 0.3308353749998787,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 0.314970583,
+      "last_content_seconds": 0.4393080000008922
+    },
+    {
+      "index": 8,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 0.5549088330044469,
+      "dispatch_lag_seconds": 0.0001382080045004841,
+      "first_content_seconds": 0.4423142080013349,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 0.426496125,
+      "last_content_seconds": 0.5492471670040686
+    },
+    {
+      "index": 9,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 0.5418939170012891,
+      "dispatch_lag_seconds": 0.00031408300128532574,
+      "first_content_seconds": 0.4298835420013347,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 0.4135665,
+      "last_content_seconds": 0.5369981250005367
+    },
+    {
+      "index": 10,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 0.6558506670007773,
+      "dispatch_lag_seconds": 0.0003193750017089769,
+      "first_content_seconds": 0.5459621670015622,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 0.525046,
+      "last_content_seconds": 0.6535976250015665
+    },
+    {
+      "index": 11,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 0.6441850830015028,
+      "dispatch_lag_seconds": 0.000554750000446802,
+      "first_content_seconds": 0.5337170419988979,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 0.511890542,
+      "last_content_seconds": 0.641359207998903
+    },
+    {
+      "index": 12,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 0.7538075830016169,
+      "dispatch_lag_seconds": 0.00024983299954328686,
+      "first_content_seconds": 0.6449496249988442,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 0.627446958,
+      "last_content_seconds": 0.7511949170002481
+    },
+    {
+      "index": 13,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 0.7410905420038034,
+      "dispatch_lag_seconds": 0.00016487500397488475,
+      "first_content_seconds": 0.6325618750015565,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 0.615972125,
+      "last_content_seconds": 0.7389564580043952
+    },
+    {
+      "index": 14,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 0.8663492080013384,
+      "dispatch_lag_seconds": 0.00010516700058360584,
+      "first_content_seconds": 0.7421483330035699,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 0.725887166,
+      "last_content_seconds": 0.8624070830010169
+    },
+    {
+      "index": 15,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 0.8534047499997541,
+      "dispatch_lag_seconds": 0.0005567500011238735,
+      "first_content_seconds": 0.729714667002554,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 0.712719417,
+      "last_content_seconds": 0.8501596250025614
+    },
+    {
+      "index": 16,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 0.9660225000006903,
+      "dispatch_lag_seconds": 0.0011781249995692633,
+      "first_content_seconds": 0.8547927920008078,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 0.834597958,
+      "last_content_seconds": 0.9633887080017303
+    },
+    {
+      "index": 17,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 0.9541124169991235,
+      "dispatch_lag_seconds": 0.0003010000000358559,
+      "first_content_seconds": 0.8424716250010533,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 0.825374292,
+      "last_content_seconds": 0.9514329999983602
+    },
+    {
+      "index": 18,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 1.0637890420039184,
+      "dispatch_lag_seconds": 0.00027550000231713057,
+      "first_content_seconds": 0.9551720000017667,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 0.937532375,
+      "last_content_seconds": 1.0604727920035657
+    },
+    {
+      "index": 19,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 1.0509103330005019,
+      "dispatch_lag_seconds": 0.00018870800340664573,
+      "first_content_seconds": 0.9431208330024674,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 0.926160625,
+      "last_content_seconds": 1.0482959580003808
+    },
+    {
+      "index": 20,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 1.16256520800016,
+      "dispatch_lag_seconds": 0.00015816700033610687,
+      "first_content_seconds": 1.053863375000219,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 1.035027666,
+      "last_content_seconds": 1.1603299170019454
+    },
+    {
+      "index": 21,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 1.1500032920012018,
+      "dispatch_lag_seconds": 0.00033395799982827157,
+      "first_content_seconds": 1.0414588749990799,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 1.022805958,
+      "last_content_seconds": 1.1480643750001036
+    },
+    {
+      "index": 22,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 1.2579200000000128,
+      "dispatch_lag_seconds": 0.000401166998926783,
+      "first_content_seconds": 1.1506048330011254,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 1.13381275,
+      "last_content_seconds": 1.2551918329991167
+    },
+    {
+      "index": 23,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 1.2452004170045257,
+      "dispatch_lag_seconds": 0.00015800000255694613,
+      "first_content_seconds": 1.1381696250027744,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 1.121690208,
+      "last_content_seconds": 1.2429382500013162
+    },
+    {
+      "index": 24,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 1.3558979170011298,
+      "dispatch_lag_seconds": 0.0004910420029773377,
+      "first_content_seconds": 1.2464468330035743,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 1.201320542,
+      "last_content_seconds": 1.3527939580017119
+    },
+    {
+      "index": 25,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 1.343006625000271,
+      "dispatch_lag_seconds": 0.0189887920023466,
+      "first_content_seconds": 1.2340897499998391,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 1.196449625,
+      "last_content_seconds": 1.3405562500011001
+    },
+    {
+      "index": 26,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 1.4527238750015385,
+      "dispatch_lag_seconds": 0.006879083000967512,
+      "first_content_seconds": 1.3432813750005153,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 1.317171916,
+      "last_content_seconds": 1.4496659169999475
+    },
+    {
+      "index": 27,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 1.4401583329999994,
+      "dispatch_lag_seconds": 0.0001385830000799615,
+      "first_content_seconds": 1.3309118329998455,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 1.315320458,
+      "last_content_seconds": 1.4374046669981908
+    },
+    {
+      "index": 28,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 1.549436458004493,
+      "dispatch_lag_seconds": 0.00017654200200922787,
+      "first_content_seconds": 1.4408848750026664,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 1.42392825,
+      "last_content_seconds": 1.546514792004018
+    },
+    {
+      "index": 29,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 1.5366452080015733,
+      "dispatch_lag_seconds": 0.00032091700268210843,
+      "first_content_seconds": 1.4285095420018479,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 1.411267709,
+      "last_content_seconds": 1.53438166700289
+    },
+    {
+      "index": 30,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 1.6440012080020097,
+      "dispatch_lag_seconds": 0.00020816700271097943,
+      "first_content_seconds": 1.5369500830020115,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 1.520615084,
+      "last_content_seconds": 1.642414750000171
+    },
+    {
+      "index": 31,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 1.6327254169991647,
+      "dispatch_lag_seconds": 0.00030620799952885136,
+      "first_content_seconds": 1.524580542001786,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 1.507787125,
+      "last_content_seconds": 1.6303316250014177
+    },
+    {
+      "index": 32,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 1.7455313749997003,
+      "dispatch_lag_seconds": 0.00018370799807598814,
+      "first_content_seconds": 1.6322468329999538,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 1.616127458,
+      "last_content_seconds": 1.7430846669994935
+    },
+    {
+      "index": 33,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 1.732734042001539,
+      "dispatch_lag_seconds": 0.0005320420023053885,
+      "first_content_seconds": 1.6200132920021133,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 1.603438166,
+      "last_content_seconds": 1.7308189580035105
+    },
+    {
+      "index": 34,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 1.8436152080030297,
+      "dispatch_lag_seconds": 0.00012358300227788277,
+      "first_content_seconds": 1.7339484170006472,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 1.717264833,
+      "last_content_seconds": 1.8403192080004374
+    },
+    {
+      "index": 35,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 1.830753583002661,
+      "dispatch_lag_seconds": 0.000773042000218993,
+      "first_content_seconds": 1.7215133749996312,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 1.702005459,
+      "last_content_seconds": 1.8280612080015999
+    },
+    {
+      "index": 36,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 1.9794894580008986,
+      "dispatch_lag_seconds": 0.0002021670006797649,
+      "first_content_seconds": 1.8311029169999529,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 1.814683166,
+      "last_content_seconds": 1.9762947080016602
+    },
+    {
+      "index": 37,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 1.9667458750009246,
+      "dispatch_lag_seconds": 0.000284333000308834,
+      "first_content_seconds": 1.8187492920005752,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 1.80242925,
+      "last_content_seconds": 1.9640386669998406
+    },
+    {
+      "index": 38,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 2.086989083003573,
+      "dispatch_lag_seconds": 0.0001337080029770732,
+      "first_content_seconds": 1.968039667000994,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 1.950869583,
+      "last_content_seconds": 2.0783965420014283
+    },
+    {
+      "index": 39,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 2.074017958002514,
+      "dispatch_lag_seconds": 0.00036995800110162236,
+      "first_content_seconds": 1.9556241250029416,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 1.938196042,
+      "last_content_seconds": 2.0664465420013585
+    },
+    {
+      "index": 40,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 2.1835118750022957,
+      "dispatch_lag_seconds": 0.0002709580003283918,
+      "first_content_seconds": 2.074607542002923,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 2.057306209,
+      "last_content_seconds": 2.1811555420026707
+    },
+    {
+      "index": 41,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 2.1708282500003406,
+      "dispatch_lag_seconds": 0.0001965830015251413,
+      "first_content_seconds": 2.0621782500020345,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 2.045784166,
+      "last_content_seconds": 2.1690522499993676
+    },
+    {
+      "index": 42,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 2.2784422080003424,
+      "dispatch_lag_seconds": 0.0007856669981265441,
+      "first_content_seconds": 2.1715817080003035,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 2.150743917,
+      "last_content_seconds": 2.2767695000002277
+    },
+    {
+      "index": 43,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 2.2670572500028356,
+      "dispatch_lag_seconds": 0.0005807080015074462,
+      "first_content_seconds": 2.159211292004329,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 2.141753667,
+      "last_content_seconds": 2.264463417002844
+    },
+    {
+      "index": 44,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 2.376046250003128,
+      "dispatch_lag_seconds": 9.033300375449471e-05,
+      "first_content_seconds": 2.2674672920038574,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 2.250642291,
+      "last_content_seconds": 2.373655917002907
+    },
+    {
+      "index": 45,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 2.363334792000387,
+      "dispatch_lag_seconds": 9.28330009628553e-05,
+      "first_content_seconds": 2.2550868750004156,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 2.238450542,
+      "last_content_seconds": 2.36144804200012
+    },
+    {
+      "index": 46,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 2.4716380829995614,
+      "dispatch_lag_seconds": 0.00030166700162226334,
+      "first_content_seconds": 2.3642735829998855,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 2.347444292,
+      "last_content_seconds": 2.4692432080009894
+    },
+    {
+      "index": 47,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 2.4589255419996334,
+      "dispatch_lag_seconds": 0.00018650000129127875,
+      "first_content_seconds": 2.3518738749990007,
+      "completion_tokens": 32,
+      "content_events": 32,
+      "route_decision": "least_inflight",
+      "prompt_tokens": 8,
+      "error_code": null,
+      "tenant": null,
+      "queue_seconds": 2.3355035,
+      "last_content_seconds": 2.456992708001053
+    }
+  ],
+  "artifact": "overload-2-baseline.json"
+}

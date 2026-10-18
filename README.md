@@ -93,6 +93,34 @@ See [the multi-tenant guide](docs/multi-tenant.zh-CN.md) for configuration, exac
 accounting semantics, PromQL, verified native cache isolation and limitations.
 Request fairness does not guarantee hard latency isolation on a shared GPU.
 
+## Interview experiment lab
+
+Use controlled reference configurations to explain how the system evolved:
+
+```bash
+uv run --extra dev --extra tokenizer pytest -q
+uv run nano-inference experiment --batch control
+uv run --extra tokenizer nano-inference experiment --batch metal
+```
+
+The CPU-only batch compares routing under injected asymmetry, deep/bounded queues,
+and FIFO/WDRR. The real Metal batch compares first-recurrence cache placement,
+a fully warm negative control, tenant scheduling, and the model context-budget guard.
+Each comparison uses identical arrivals and three AB/BA repetitions. Every outcome,
+warmup, native counter and quality flag is retained under `results/experiments/`.
+Run batches sequentially and avoid unrelated model traffic during measurement.
+
+The built-in monitor links to **http://127.0.0.1:8000/experiments**, a self-contained
+results table generated from the raw reports. See [the step-by-step lab](docs/interview-lab.zh-CN.md)
+and [measured results / interview narrative](docs/interview-results.zh-CN.md).
+The results include neutral outcomes and trade-offs; local timing is not a CUDA scaling claim.
+
+Useful runtime knobs: `serve --no-prefix-caching`, `serve --no-context-guard`,
+`--policy`, `--capacity`, `--max-queue`, and the tenant policy's `scheduler`/weights.
+The context guard is enabled by default for real-runtime profiles, using the same
+chat tokenizer and model-length budget as the prepared runtime. Authentication and
+tenant cache isolation remain enabled when comparing scheduling policies.
+
 ## Run the simulator
 
 Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/).

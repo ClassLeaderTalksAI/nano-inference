@@ -29,6 +29,8 @@ class Result:
     prompt_tokens: int | None = None
     error_code: str | None = None
     tenant: str | None = None
+    queue_seconds: float | None = None
+    last_content_seconds: float | None = None
 
 
 def workload_messages(index: int, workload: str, groups: int, repetitions: int) -> list[dict]:
@@ -82,6 +84,8 @@ async def send_request(
             result.http_status = response.status_code
             result.worker = response.headers.get("x-worker-id")
             result.route_decision = response.headers.get("x-route-decision")
+            if response.headers.get("x-queue-seconds"):
+                result.queue_seconds = float(response.headers["x-queue-seconds"])
             if response.status_code != 200:
                 result.outcome = "rejected" if response.status_code == 429 else "http_error"
                 try:
@@ -105,6 +109,7 @@ async def send_request(
                     break
                 if has_content(event):
                     result.content_events += 1
+                    result.last_content_seconds = time.perf_counter() - scheduled
                     if result.first_content_seconds is None:
                         result.first_content_seconds = time.perf_counter() - scheduled
                 finished |= any(
@@ -157,6 +162,18 @@ def summarize(results: list[Result], elapsed: float, slo: float) -> dict:
             "p95": percentile([r.latency_seconds for r in successes], 0.95),
         },
         "max_dispatch_lag_seconds": max((r.dispatch_lag_seconds for r in results), default=0),
+        "successful_queue_seconds": {
+            "p50": percentile(
+                [r.queue_seconds for r in successes if r.queue_seconds is not None], 0.5
+            ),
+            "p95": percentile(
+                [r.queue_seconds for r in successes if r.queue_seconds is not None], 0.95
+            ),
+        },
+        "successful_fraction_of_arrivals": len(successes) / len(results) if results else None,
+        "ttft_slo_fraction_of_arrivals": sum(t <= slo for t in firsts) / len(results)
+        if results
+        else None,
         "note": "First content is a client observation; content events are not token counts.",
     }
 

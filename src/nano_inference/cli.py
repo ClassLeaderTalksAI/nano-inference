@@ -9,6 +9,7 @@ import sys
 import uvicorn
 
 from .benchmark import run_benchmark
+from .experiments import run_experiments
 from .flavors import serve_flavor
 from .gateway import Settings, create_gateway
 from .mock_worker import Behavior, create_mock_worker
@@ -120,6 +121,7 @@ def main():
     gateway_options(gateway)
     gateway.add_argument("--worker-urls", nargs="+", default=Settings().worker_urls)
     gateway.add_argument("--model", default="nano-model")
+    gateway.add_argument("--max-model-len", type=int, help="Input + output token budget guard")
     gateway.add_argument("--health-interval", type=float, default=1)
     gateway.add_argument("--model-revision", default="simulator-v1")
     gateway.add_argument(
@@ -128,6 +130,8 @@ def main():
     serve = commands.add_parser("serve", help="Run the shared platform with a vLLM flavor")
     serve.add_argument("--tenant-config", help="Tenant policy JSON; API keys come from env")
     serve.add_argument("--profile", default="configs/macos-metal.json")
+    serve.add_argument("--prefix-caching", action=argparse.BooleanOptionalAction, default=True)
+    serve.add_argument("--context-guard", action=argparse.BooleanOptionalAction, default=True)
     serve.add_argument("--workers", type=int, choices=[1, 2], default=2)
     serve.add_argument("--port", type=int, default=8000)
     serve.add_argument("--worker-ports", type=int, nargs="+")
@@ -167,6 +171,11 @@ def main():
     tenant_load.add_argument("--max-outstanding", type=int, default=64)
     tenant_load.add_argument("--max-tokens", type=int, default=32)
     tenant_load.add_argument("--output", default="results/tenants-latest.json")
+    experiment = commands.add_parser("experiment", help="Paired interview evidence batches")
+    experiment.add_argument("--batch", choices=["control", "metal"], default="control")
+    experiment.add_argument("--config", default="configs/experiments.local.json")
+    experiment.add_argument("--output")
+    experiment.add_argument("--profile", default="configs/macos-metal.json")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(name)s %(message)s")
     logging.getLogger("httpx").setLevel(logging.WARNING)
@@ -192,6 +201,8 @@ def main():
             asyncio.run(serve_flavor(args))
         except KeyboardInterrupt:
             pass
+    elif args.command == "experiment":
+        asyncio.run(run_experiments(**{k: v for k, v in vars(args).items() if k != "command"}))
     else:
         runner = run_tenant_benchmark if args.command == "tenant-load" else run_benchmark
         report = asyncio.run(runner(**{k: v for k, v in vars(args).items() if k != "command"}))

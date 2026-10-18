@@ -18,6 +18,7 @@ continuous batching, and KV-cache allocation.
 | 5 — Local real-model smoke test | A small GGUF model served through llama.cpp | Verify supported request fields, SSE, usage, cancellation; no GPU-performance claims |
 | 6 — Mac Metal flavor | Native vLLM Metal runtime, pinned MLX model and shared platform | Two real local replicas, engine cache/queue metrics, cancellation, overload and restart |
 | 6b — Multi-tenant and monitoring | Identity, quotas, per-tenant queues, WDRR, cache salts, local dashboard | Token-cost fairness; independent admission; native cross-tenant cache counter checks; visible failures |
+| 6c — Controlled experiments | Paired workload replay, quality gates, warm-cache negative control, context guard, narrative | Raw trials and failures retained; simulator vs native scope explicit; neutral results preserved |
 | 7 — Linux CUDA flavor | Entire platform on RunPod with pinned CUDA runtime and model | First one GPU, then two independent GPU replicas; repeat the same acceptance checks |
 | 8 — Analysis | Raw data, configuration, plots and documented limitations | Every performance claim traceable to measured runs |
 
@@ -32,7 +33,9 @@ and worker failure/restart. See [the Mac review](mac-flavor-review.zh-CN.md) and
 analysis remain pending local-flavor review.
 Milestone 6b is now implemented and validated locally; see [the multi-tenant guide](multi-tenant.zh-CN.md)
 and `results/macos-metal/tenants/`. Local monitoring is built in; a separate Prometheus/Grafana
-service is optional and has not been installed. Formal policy comparisons remain pending.
+service is optional and has not been installed. Local paired comparisons are now recorded in `results/experiments/`; see the
+[experiment lab](interview-lab.zh-CN.md) and [measured narrative](interview-results.zh-CN.md).
+Longer statistical studies and CUDA policy comparisons remain pending.
 CLI and request fields may evolve as real backend integration reveals differences.
 
 ## Model and hardware starting point

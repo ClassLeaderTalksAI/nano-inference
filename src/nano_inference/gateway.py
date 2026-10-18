@@ -47,17 +47,22 @@ class Settings:
     affinity_ttl: float = 60
     affinity_max_skew: int = 1
     tenant_config: str | None = None
+    max_model_len: int | None = None
 
     def __post_init__(self):
+        if self.max_model_len is not None and self.max_model_len < 1:
+            raise ValueError("Model context limit must be positive")
         timings = (self.request_timeout, self.health_interval, self.health_timeout)
         if any(not math.isfinite(t) or t <= 0 for t in timings):
             raise ValueError("Timeouts and health interval must be positive")
         if self.prefix_tokens < 1 or self.prefix_preparations < 1 or not self.model_revision:
             raise ValueError("Prefix settings require positive counts and a model revision")
-        if (self.policy == "prefix_affinity" or self.tenant_config) and self.model != "nano-model":
+        if (
+            self.policy == "prefix_affinity" or self.tenant_config or self.max_model_len
+        ) and self.model != "nano-model":
             if not self.prefix_tokenizer or self.model_revision == "simulator-v1":
                 raise ValueError(
-                    "Real-model affinity requires a local tokenizer and model revision"
+                    "Real-model token accounting requires a local tokenizer and model revision"
                 )
         for url in self.worker_urls:
             parsed = httpx.URL(url)
@@ -213,10 +218,10 @@ def create_gateway(
 
     @asynccontextmanager
     async def lifespan(app):
-        if settings.policy == "prefix_affinity" or tenant_config:
+        if settings.policy == "prefix_affinity" or tenant_config or settings.max_model_len:
             encoder = prefix_encoder
             if encoder is None:
-                if settings.prefix_tokenizer:
+                if settings.prefix_tokenizer and settings.model != "nano-model":
                     encoder = await asyncio.to_thread(
                         PrefixEncoder.from_pretrained,
                         settings.model,
@@ -398,11 +403,17 @@ def create_gateway(
                     if sum(len(m.content) for m in body.messages) > 200_000:
                         outcome = "prefix_input_too_large"
                         return error(413, outcome)
-                    if tenant_config:
+                    if tenant_config or settings.max_model_len:
                         key, input_tokens = await app.state.preparer.prepare(body.messages)
-                        key = digest([tenant_id, key]) if key is not None else None
+                        if tenant_config:
+                            key = digest([tenant_id, key]) if key is not None else None
                     else:
                         key = await app.state.preparer.key(body.messages)
+                if (
+                    settings.max_model_len
+                    and input_tokens + body.max_tokens > settings.max_model_len
+                ):
+                    raise AdmissionError(400, "context_length_exceeded")
                 lease = await pool.acquire(
                     key,
                     **(
@@ -439,6 +450,7 @@ def create_gateway(
                     "X-Request-ID": request_id,
                     "X-Worker-ID": lease.worker.name,
                     "X-Route-Decision": lease.decision,
+                    "X-Queue-Seconds": f"{lease.queue_seconds:.9f}",
                 }
                 if not body.stream:
                     data = json.loads(await upstream.aread())

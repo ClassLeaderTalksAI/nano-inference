@@ -1,0 +1,143 @@
+{
+  "case": "context",
+  "repeat": 1,
+  "variant": "baseline",
+  "backend": "vllm-metal",
+  "changed_knob": {
+    "max_model_len": null
+  },
+  "gateway_settings": {
+    "worker_urls": [
+      "http://127.0.0.1:64515"
+    ],
+    "model": "nano-qwen",
+    "policy": "prefix_affinity",
+    "capacity": 4,
+    "max_queue": 16,
+    "queue_timeout": 2,
+    "request_timeout": 30,
+    "health_interval": 1,
+    "health_timeout": 1,
+    "model_revision": "50d427756c6b1b2fe0c0a10f67fbda1fc8e82c1b",
+    "prefix_tokenizer": "/Users/weihliu/Github/nano-inference/.local/metal-model",
+    "prefix_tokens": 64,
+    "prefix_preparations": 4,
+    "affinity_capacity": 1024,
+    "affinity_ttl": 60,
+    "affinity_max_skew": 1,
+    "tenant_config": null,
+    "max_model_len": null
+  },
+  "summary": {
+    "requests": 1,
+    "outcomes": {
+      "http_error": 1
+    },
+    "elapsed_seconds": 0.020909708000544924,
+    "successful_requests_per_second": 0.0,
+    "output_tokens_per_second": null,
+    "successful_requests_meeting_ttft_slo_per_second": 0.0,
+    "ttft_slo_seconds": 2,
+    "successful_first_content_seconds": {
+      "p50": null,
+      "p95": null
+    },
+    "successful_latency_seconds": {
+      "p50": null,
+      "p95": null
+    },
+    "max_dispatch_lag_seconds": 0.013166000000637723,
+    "successful_queue_seconds": {
+      "p50": null,
+      "p95": null
+    },
+    "successful_fraction_of_arrivals": 0.0,
+    "ttft_slo_fraction_of_arrivals": 0.0,
+    "note": "First content is a client observation; content events are not token counts.",
+    "first_content_mean_seconds": null,
+    "workers": {},
+    "error_codes": {
+      "upstream_http_error": 1
+    }
+  },
+  "tenants": {},
+  "quality": {
+    "usable_for_comparison": true,
+    "flags": [],
+    "max_allowed_dispatch_lag_seconds": 0.05,
+    "statistical_significance": "not_established"
+  },
+  "followup_valid_request": {
+    "index": 1,
+    "outcome": "success",
+    "http_status": 200,
+    "worker": "worker-1",
+    "latency_seconds": 0.15148491699801525,
+    "dispatch_lag_seconds": 0.01307579199783504,
+    "first_content_seconds": 0.07302220899873646,
+    "completion_tokens": 4,
+    "content_events": 4,
+    "route_decision": "prefix_too_short",
+    "prompt_tokens": 19,
+    "error_code": null,
+    "tenant": null,
+    "queue_seconds": 0.0,
+    "last_content_seconds": 0.15101895900079398
+  },
+  "final_pool": {
+    "policy": "prefix_affinity",
+    "capacity_per_worker": 4,
+    "queued": 0,
+    "max_queue": 16,
+    "queue_timeout_seconds": 2,
+    "route_decisions": {
+      "prefix_too_short": 2
+    },
+    "affinity": {
+      "entries": 0,
+      "capacity": 1024,
+      "ttl_seconds": 60,
+      "max_load_skew": 1
+    },
+    "workers": [
+      {
+        "id": "worker-1",
+        "healthy": true,
+        "inflight": 0,
+        "last_health_check": 1792349939.0635788
+      }
+    ],
+    "prefix_preparation": {
+      "capacity": 4,
+      "inflight": 0
+    },
+    "prefix_identity": {
+      "model": "nano-qwen",
+      "model_revision": "50d427756c6b1b2fe0c0a10f67fbda1fc8e82c1b",
+      "encoding": "huggingface",
+      "tokenizer_fingerprint": "f1e264d1fff741970848e313688ec4090635abb93476dd27de8ebf3d6e75c459",
+      "chat_template_fingerprint": "05991410a4bad1a587959aa5c8901f699afc639540f931afd8ba2b359e4368a9",
+      "prefix_tokens": 64
+    }
+  },
+  "results": [
+    {
+      "index": 0,
+      "outcome": "http_error",
+      "http_status": 502,
+      "worker": null,
+      "latency_seconds": 0.020856666000327095,
+      "dispatch_lag_seconds": 0.013166000000637723,
+      "first_content_seconds": null,
+      "completion_tokens": null,
+      "content_events": 0,
+      "route_decision": null,
+      "prompt_tokens": null,
+      "error_code": "upstream_http_error",
+      "tenant": null,
+      "queue_seconds": null,
+      "last_content_seconds": null
+    }
+  ],
+  "artifact": "context-1-baseline.json"
+}

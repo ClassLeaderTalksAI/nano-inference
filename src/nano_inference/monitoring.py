@@ -119,6 +119,16 @@ class Monitor:
         async def page():
             return HTMLResponse(Path(__file__).with_name("dashboard.html").read_text())
 
+        @self.app.get("/experiments", include_in_schema=False)
+        async def experiments():
+            path = Path.cwd() / "results/experiments/report.html"
+            if not path.exists():
+                return HTMLResponse(
+                    "Run the control and Metal experiment batches to generate this report.",
+                    status_code=404,
+                )
+            return HTMLResponse(path.read_text())
+
         @self.app.get("/monitor/api", include_in_schema=False)
         async def snapshot():
             return {

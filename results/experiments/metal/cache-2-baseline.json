@@ -1,0 +1,359 @@
+{
+  "case": "cache",
+  "repeat": 2,
+  "variant": "baseline",
+  "backend": "vllm-metal",
+  "changed_knob": {
+    "policy": "round_robin"
+  },
+  "gateway_settings": {
+    "worker_urls": [
+      "http://127.0.0.1:64515",
+      "http://127.0.0.1:64516"
+    ],
+    "model": "nano-qwen",
+    "policy": "round_robin",
+    "capacity": 1,
+    "max_queue": 16,
+    "queue_timeout": 2,
+    "request_timeout": 60,
+    "health_interval": 1,
+    "health_timeout": 1,
+    "model_revision": "50d427756c6b1b2fe0c0a10f67fbda1fc8e82c1b",
+    "prefix_tokenizer": "/Users/weihliu/Github/nano-inference/.local/metal-model",
+    "prefix_tokens": 64,
+    "prefix_preparations": 4,
+    "affinity_capacity": 1024,
+    "affinity_ttl": 60,
+    "affinity_max_skew": 1,
+    "tenant_config": "/Users/weihliu/Github/nano-inference/.local/experiment-cache.json",
+    "max_model_len": 2048
+  },
+  "cache_condition": "Three groups, one prime per group, then first recurrence. New gateway salt each variant; identical prompt tokens. This is not steady-state cache-pressure performance.",
+  "warmup_excluded": [
+    {
+      "index": 0,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 2.288894083001651,
+      "dispatch_lag_seconds": 0.01364145800107508,
+      "first_content_seconds": 2.153345167000225,
+      "completion_tokens": 5,
+      "content_events": 4,
+      "route_decision": "round_robin",
+      "prompt_tokens": 598,
+      "error_code": null,
+      "tenant": "cache",
+      "queue_seconds": 3.0125e-05,
+      "last_content_seconds": 2.2543901669996558
+    },
+    {
+      "index": 1,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 2.245252791999519,
+      "dispatch_lag_seconds": 0.01315233400237048,
+      "first_content_seconds": 2.1187793749995762,
+      "completion_tokens": 5,
+      "content_events": 4,
+      "route_decision": "round_robin",
+      "prompt_tokens": 598,
+      "error_code": null,
+      "tenant": "cache",
+      "queue_seconds": 3.7292e-05,
+      "last_content_seconds": 2.213410667001881
+    },
+    {
+      "index": 2,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 2.2641214590003074,
+      "dispatch_lag_seconds": 0.013998834001540672,
+      "first_content_seconds": 2.127115125000273,
+      "completion_tokens": 5,
+      "content_events": 4,
+      "route_decision": "round_robin",
+      "prompt_tokens": 598,
+      "error_code": null,
+      "tenant": "cache",
+      "queue_seconds": 3.1792e-05,
+      "last_content_seconds": 2.230827292001777
+    }
+  ],
+  "phase_wall_seconds": 14.017106874998717,
+  "summary": {
+    "requests": 3,
+    "outcomes": {
+      "success": 3
+    },
+    "elapsed_seconds": 6.694988167000702,
+    "successful_requests_per_second": 0.44809638570936783,
+    "output_tokens_per_second": 2.2404819285468394,
+    "successful_requests_meeting_ttft_slo_per_second": 0.0,
+    "ttft_slo_seconds": 2,
+    "successful_first_content_seconds": {
+      "p50": 2.117049083000893,
+      "p95": 2.1257831708015145
+    },
+    "successful_latency_seconds": {
+      "p50": 2.2448488750014803,
+      "p95": 2.2576266250020125
+    },
+    "max_dispatch_lag_seconds": 0.014006541001435835,
+    "successful_queue_seconds": {
+      "p50": 2.9959e-05,
+      "p95": 3.01462e-05
+    },
+    "successful_fraction_of_arrivals": 1.0,
+    "ttft_slo_fraction_of_arrivals": 0.0,
+    "note": "First content is a client observation; content events are not token counts.",
+    "first_content_mean_seconds": 2.0956763193341126,
+    "workers": {
+      "worker-2": 2,
+      "worker-1": 1
+    },
+    "error_codes": {}
+  },
+  "tenants": {},
+  "quality": {
+    "usable_for_comparison": true,
+    "flags": [],
+    "max_allowed_dispatch_lag_seconds": 0.05,
+    "statistical_significance": "not_established"
+  },
+  "final_pool": {
+    "policy": "round_robin",
+    "capacity_per_worker": 1,
+    "queued": 0,
+    "max_queue": 16,
+    "queue_timeout_seconds": 2,
+    "route_decisions": {
+      "round_robin": 6
+    },
+    "affinity": {
+      "entries": 0,
+      "capacity": 1024,
+      "ttl_seconds": 60,
+      "max_load_skew": 1
+    },
+    "workers": [
+      {
+        "id": "worker-1",
+        "healthy": true,
+        "inflight": 0,
+        "last_health_check": 1792349828.471547
+      },
+      {
+        "id": "worker-2",
+        "healthy": true,
+        "inflight": 0,
+        "last_health_check": 1792349828.471822
+      }
+    ],
+    "scheduler": "wdrr",
+    "tenants": [
+      {
+        "id": "cache",
+        "weight": 1,
+        "inflight": 0,
+        "queued": 0,
+        "max_inflight": 1,
+        "max_queue": 8,
+        "rpm_remaining": 10000,
+        "tpm_remaining": 1000000,
+        "ttft_slo_seconds": 2.0,
+        "deficit": 0,
+        "estimated_dispatched_cost": 3684.0,
+        "actual_settled_cost": 3648.0,
+        "usage_settlements": 6,
+        "conservative_settlements": 0,
+        "conservative_cost": 0,
+        "workers": null
+      }
+    ],
+    "prefix_preparation": {
+      "capacity": 4,
+      "inflight": 0
+    },
+    "prefix_identity": {
+      "model": "nano-qwen",
+      "model_revision": "50d427756c6b1b2fe0c0a10f67fbda1fc8e82c1b",
+      "encoding": "huggingface",
+      "tokenizer_fingerprint": "f1e264d1fff741970848e313688ec4090635abb93476dd27de8ebf3d6e75c459",
+      "chat_template_fingerprint": "05991410a4bad1a587959aa5c8901f699afc639540f931afd8ba2b359e4368a9",
+      "prefix_tokens": 64
+    }
+  },
+  "native_phase_means_seconds": {
+    "time_to_first_token_seconds": 2.0749194622039795,
+    "request_prefill_time_seconds": 2.066392555333247,
+    "request_decode_time_seconds": 0.13808265299909786,
+    "request_time_per_output_token_seconds": 0.034520663249774465
+  },
+  "native_before": [
+    {
+      "values": {
+        "vllm:num_requests_running": 0.0,
+        "vllm:num_requests_waiting": 0.0,
+        "vllm:kv_cache_usage_perc": 0.0,
+        "vllm:prefix_cache_queries_total": 9568.0,
+        "vllm:prefix_cache_hits_total": 2368.0,
+        "vllm:request_success_total": 16.0,
+        "vllm:time_to_first_token_seconds_count": 16.0,
+        "vllm:time_to_first_token_seconds_sum": 27.142083644866943,
+        "vllm:request_time_per_output_token_seconds_count": 16.0,
+        "vllm:request_time_per_output_token_seconds_sum": 0.5532276357489536,
+        "vllm:request_prefill_time_seconds_count": 16.0,
+        "vllm:request_prefill_time_seconds_sum": 27.01322529200843,
+        "vllm:request_decode_time_seconds_count": 16.0,
+        "vllm:request_decode_time_seconds_sum": 2.2129105429958145
+      },
+      "finished_by_reason": {
+        "stop": 16.0,
+        "length": 0.0,
+        "abort": 0.0,
+        "error": 0.0,
+        "repetition": 0.0
+      }
+    },
+    {
+      "values": {
+        "vllm:num_requests_running": 0.0,
+        "vllm:num_requests_waiting": 0.0,
+        "vllm:kv_cache_usage_perc": 0.0,
+        "vllm:prefix_cache_queries_total": 6578.0,
+        "vllm:prefix_cache_hits_total": 1184.0,
+        "vllm:request_success_total": 11.0,
+        "vllm:time_to_first_token_seconds_count": 11.0,
+        "vllm:time_to_first_token_seconds_sum": 20.299396753311157,
+        "vllm:request_time_per_output_token_seconds_count": 11.0,
+        "vllm:request_time_per_output_token_seconds_sum": 0.3687473224990754,
+        "vllm:request_prefill_time_seconds_count": 11.0,
+        "vllm:request_prefill_time_seconds_sum": 20.211713667998993,
+        "vllm:request_decode_time_seconds_count": 11.0,
+        "vllm:request_decode_time_seconds_sum": 1.4749892899963015
+      },
+      "finished_by_reason": {
+        "stop": 11.0,
+        "length": 0.0,
+        "abort": 0.0,
+        "error": 0.0,
+        "repetition": 0.0
+      }
+    }
+  ],
+  "native_after": [
+    {
+      "values": {
+        "vllm:num_requests_running": 0.0,
+        "vllm:num_requests_waiting": 0.0,
+        "vllm:kv_cache_usage_perc": 0.0,
+        "vllm:prefix_cache_queries_total": 10166.0,
+        "vllm:prefix_cache_hits_total": 2368.0,
+        "vllm:request_success_total": 17.0,
+        "vllm:time_to_first_token_seconds_count": 17.0,
+        "vllm:time_to_first_token_seconds_sum": 29.163973569869995,
+        "vllm:request_time_per_output_token_seconds_count": 17.0,
+        "vllm:request_time_per_output_token_seconds_sum": 0.5893984587482919,
+        "vllm:request_prefill_time_seconds_count": 17.0,
+        "vllm:request_prefill_time_seconds_sum": 29.02683562500897,
+        "vllm:request_decode_time_seconds_count": 17.0,
+        "vllm:request_decode_time_seconds_sum": 2.3575938349931675
+      },
+      "finished_by_reason": {
+        "stop": 17.0,
+        "length": 0.0,
+        "abort": 0.0,
+        "error": 0.0,
+        "repetition": 0.0
+      }
+    },
+    {
+      "values": {
+        "vllm:num_requests_running": 0.0,
+        "vllm:num_requests_waiting": 0.0,
+        "vllm:kv_cache_usage_perc": 0.0,
+        "vllm:prefix_cache_queries_total": 7774.0,
+        "vllm:prefix_cache_hits_total": 1184.0,
+        "vllm:request_success_total": 13.0,
+        "vllm:time_to_first_token_seconds_count": 13.0,
+        "vllm:time_to_first_token_seconds_sum": 24.502265214920044,
+        "vllm:request_time_per_output_token_seconds_count": 13.0,
+        "vllm:request_time_per_output_token_seconds_sum": 0.4361384892490605,
+        "vllm:request_prefill_time_seconds_count": 13.0,
+        "vllm:request_prefill_time_seconds_sum": 24.39728100099819,
+        "vllm:request_decode_time_seconds_count": 13.0,
+        "vllm:request_decode_time_seconds_sum": 1.744553956996242
+      },
+      "finished_by_reason": {
+        "stop": 13.0,
+        "length": 0.0,
+        "abort": 0.0,
+        "error": 0.0,
+        "repetition": 0.0
+      }
+    }
+  ],
+  "native_cache": {
+    "hit_tokens": 0.0,
+    "queried_tokens": 1794.0,
+    "token_hit_ratio": 0.0
+  },
+  "results": [
+    {
+      "index": 0,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 2.2590463750020717,
+      "dispatch_lag_seconds": 0.013511417000700021,
+      "first_content_seconds": 2.1267536250015837,
+      "completion_tokens": 5,
+      "content_events": 4,
+      "route_decision": "round_robin",
+      "prompt_tokens": 598,
+      "error_code": null,
+      "tenant": "cache",
+      "queue_seconds": 3.0167e-05,
+      "last_content_seconds": 2.227485000003071
+    },
+    {
+      "index": 1,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-1",
+      "latency_seconds": 2.183444166999834,
+      "dispatch_lag_seconds": 0.01335533300152747,
+      "first_content_seconds": 2.0432262499998615,
+      "completion_tokens": 5,
+      "content_events": 4,
+      "route_decision": "round_robin",
+      "prompt_tokens": 598,
+      "error_code": null,
+      "tenant": "cache",
+      "queue_seconds": 2.9959e-05,
+      "last_content_seconds": 2.149112833001709
+    },
+    {
+      "index": 2,
+      "outcome": "success",
+      "http_status": 200,
+      "worker": "worker-2",
+      "latency_seconds": 2.2448488750014803,
+      "dispatch_lag_seconds": 0.014006541001435835,
+      "first_content_seconds": 2.117049083000893,
+      "completion_tokens": 5,
+      "content_events": 4,
+      "route_decision": "round_robin",
+      "prompt_tokens": 598,
+      "error_code": null,
+      "tenant": "cache",
+      "queue_seconds": 2.7542e-05,
+      "last_content_seconds": 2.214874958001019
+    }
+  ],
+  "artifact": "cache-2-baseline.json"
+}

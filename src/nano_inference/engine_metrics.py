@@ -15,6 +15,10 @@ METRICS = {
     "vllm:request_time_per_output_token_seconds_count",
     "vllm:request_time_per_output_token_seconds_sum",
     "vllm:request_success_total",
+    "vllm:request_prefill_time_seconds_count",
+    "vllm:request_prefill_time_seconds_sum",
+    "vllm:request_decode_time_seconds_count",
+    "vllm:request_decode_time_seconds_sum",
 }
 
 

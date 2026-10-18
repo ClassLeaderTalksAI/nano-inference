@@ -177,6 +177,7 @@ class FlavorCluster:
         prefix_caching: bool = True,
         log_dir: Path | None = None,
         tenant_config: str | None = None,
+        context_guard: bool = True,
     ):
         if workers not in (1, 2):
             raise ValueError("This learning profile supports one or two replicas")
@@ -216,6 +217,8 @@ class FlavorCluster:
             "--health-interval",
             ".2",
         ]
+        if context_guard:
+            self.gateway_command.extend(["--max-model-len", str(profile.max_model_len)])
         if tenant_config:
             self.gateway_command.extend(["--tenant-config", str(Path(tenant_config).resolve())])
         self.children: list[asyncio.subprocess.Process] = []
@@ -325,6 +328,8 @@ async def serve_flavor(args):
         max_queue=args.max_queue,
         request_timeout=args.request_timeout,
         tenant_config=args.tenant_config,
+        prefix_caching=args.prefix_caching,
+        context_guard=args.context_guard,
     )
     try:
         await cluster.start()
