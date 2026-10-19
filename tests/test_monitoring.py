@@ -1,4 +1,5 @@
 import httpx
+import pytest
 from fastapi import FastAPI
 from fastapi.responses import PlainTextResponse
 
@@ -10,7 +11,8 @@ from .test_gateway import payload
 from .test_tenants import config, config_file
 
 
-async def test_native_polling_exposes_values_then_marks_failed_scrapes_missing():
+@pytest.mark.parametrize("policy", ["least_inflight", "predicted_ttft"])
+async def test_native_polling_exposes_values_then_marks_failed_scrapes_missing(policy):
     engine = FastAPI()
     engine.state.fail = False
 
@@ -31,12 +33,13 @@ vllm:prefix_cache_hits_total 50
 """)
 
     async with serve(engine) as worker:
-        app = create_gateway(Settings(worker_urls=[worker]))
+        app = create_gateway(Settings(worker_urls=[worker], policy=policy))
         async with serve(app) as url, httpx.AsyncClient(base_url=url, trust_env=False) as c:
             await app.state.dashboard.poll()
             data = (await c.get("/monitor/api")).json()
             assert data["engines"]["worker-1"]["values"]["vllm:kv_cache_usage_perc"] == 0.25
             assert data["engines"]["worker-1"]["available"]
+            assert app.state.pool.placement.native["worker-1"][2]["kv_cache_usage_perc"] == 0.25
             assert (
                 'nano_engine_kv_cache_usage_perc{worker="worker-1"} 0.25'
                 in (await c.get("/metrics")).text
@@ -46,6 +49,7 @@ vllm:prefix_cache_hits_total 50
             data = (await c.get("/monitor/api")).json()
             assert not data["engines"]["worker-1"]["available"]
             assert data["engines"]["worker-1"]["values"] is None
+            assert "worker-1" not in app.state.pool.placement.native
             assert (
                 'nano_engine_kv_cache_usage_perc{worker="worker-1"} NaN'
                 in (await c.get("/metrics")).text

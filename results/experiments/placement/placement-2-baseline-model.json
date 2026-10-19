@@ -1,0 +1,32 @@
+{
+  "service": {
+    "base_seconds": 0.01,
+    "prefill_tokens_per_second": 1000000.0,
+    "decode_tokens_per_second": 333.3333333333333,
+    "parallelism": 1.0
+  },
+  "workers": {
+    "worker-1": {
+      "base_seconds": 0.003,
+      "prefill_tokens_per_second": 1000000.0,
+      "decode_tokens_per_second": 2000.0,
+      "parallelism": 1.0
+    },
+    "worker-2": {
+      "base_seconds": 0.04,
+      "prefill_tokens_per_second": 1000000.0,
+      "decode_tokens_per_second": 250.0,
+      "parallelism": 1.0
+    }
+  },
+  "cache_capacity": 4096,
+  "cache_ttl_seconds": 30.0,
+  "cache_reuse_discount": 0.0,
+  "metrics_max_age_seconds": 5.0,
+  "external_request_seconds": 0.5,
+  "kv_soft_limit": 0.8,
+  "kv_penalty_seconds": 0.5,
+  "default_slo_seconds": 0.25,
+  "slo_admission": false,
+  "slo_safety_factor": 1.2
+}

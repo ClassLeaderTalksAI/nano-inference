@@ -17,6 +17,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, Field, SecretStr, model_validator
 
+from .placement import RouteRequest
 from .routing import AdmissionError, Lease, WorkerPool
 
 
@@ -75,6 +76,8 @@ class Ticket:
     reserved_cost: float
     started: float
     lease: Lease | None = None
+    route_request: RouteRequest | None = None
+    error: AdmissionError | None = None
 
 
 @dataclass
@@ -173,15 +176,25 @@ class TenantPool(WorkerPool):
             s = self.states[tenant]
             ticket = s.queue.popleft()
             allowed = s.config.workers
-            selected = self._select(ticket.key, allowed)
+            selected = self._select(ticket.key, allowed, ticket.route_request)
             assert selected is not None  # Eligibility and reservation share the condition lock.
-            ticket.lease = self._reserve(selected, ticket.key, self.clock() - ticket.started)
-            ticket.lease.tenant_id = tenant
-            ticket.lease.estimated_cost = ticket.cost
-            ticket.lease.reserved_tokens = ticket.reserved
-            ticket.lease.reserved_cost = ticket.reserved_cost
-            s.inflight += 1
-            s.dispatched_cost += ticket.cost
+            try:
+                ticket.lease = self._reserve(
+                    selected, ticket.key, self.clock() - ticket.started, ticket.route_request
+                )
+            except AdmissionError as exc:
+                # Deadline rejection spends RPM but no TPM, WDRR credit or slot.
+                ticket.error = exc
+                s.tpm.refill(self.clock())
+                s.tpm.balance = min(s.tpm.capacity, s.tpm.balance + ticket.reserved)
+                s.deficit = min(self.deficit_cap, s.deficit + ticket.cost)
+            else:
+                ticket.lease.tenant_id = tenant
+                ticket.lease.estimated_cost = ticket.cost
+                ticket.lease.reserved_tokens = ticket.reserved
+                ticket.lease.reserved_cost = ticket.reserved_cost
+                s.inflight += 1
+                s.dispatched_cost += ticket.cost
             self.waiters.remove(ticket)
             if not s.queue:
                 self.rotation.remove(tenant)
@@ -189,7 +202,15 @@ class TenantPool(WorkerPool):
                 s.deficit = min(0, s.deficit)  # No credit banking while idle.
         self.condition.notify_all()
 
-    async def acquire(self, prefix_key=None, *, tenant: str, input_tokens: int, max_tokens: int):
+    async def acquire(
+        self,
+        prefix_key=None,
+        *,
+        tenant: str,
+        input_tokens: int,
+        max_tokens: int,
+        route_request: RouteRequest | None = None,
+    ):
         s = self.states[tenant]
         cost = input_tokens + self.config.decode_cost * min(
             max_tokens, s.config.expected_output_tokens
@@ -202,6 +223,7 @@ class TenantPool(WorkerPool):
             reserved,
             input_tokens + self.config.decode_cost * max_tokens,
             self.clock(),
+            route_request=route_request,
         )
         self.deficit_cap = max(self.deficit_cap, cost + s.config.weight * self.config.quantum)
         async with self.condition:
@@ -231,9 +253,11 @@ class TenantPool(WorkerPool):
                 self.rotation.append(tenant)
             returned = False
             try:
-                async with asyncio.timeout(self.queue_timeout):
+                async with asyncio.timeout(self.wait_budget(route_request)):
                     while True:
                         self._pump()
+                        if ticket.error:
+                            raise ticket.error
                         if ticket.lease is not None:
                             returned = True
                             return ticket.lease
@@ -241,9 +265,9 @@ class TenantPool(WorkerPool):
                             raise AdmissionError(503, "no_healthy_workers")
                         await self.condition.wait()
             except TimeoutError as exc:
-                raise AdmissionError(429, "queue_timeout") from exc
+                raise AdmissionError(429, self.wait_timeout_code(route_request)) from exc
             finally:
-                if not returned:
+                if not returned and ticket.error is None:
                     if ticket.lease is not None:
                         self._finish(ticket.lease, None, False, dispatched=False)
                     else:

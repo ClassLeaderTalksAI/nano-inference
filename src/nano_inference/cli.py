@@ -20,7 +20,7 @@ def gateway_options(parser):
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument(
         "--policy",
-        choices=["round_robin", "least_inflight", "prefix_affinity"],
+        choices=["round_robin", "least_inflight", "prefix_affinity", "predicted_ttft"],
         default="least_inflight",
     )
     parser.add_argument("--capacity", type=int, default=4, help="In-flight limit per worker")
@@ -33,6 +33,9 @@ def gateway_options(parser):
     parser.add_argument("--affinity-max-skew", type=int, default=1)
     parser.add_argument("--prefix-preparations", type=int, default=4)
     parser.add_argument("--tenant-config", help="Tenant policy JSON; API keys come from env")
+    parser.add_argument(
+        "--placement-config", help="Analytical TTFT model JSON; priors require calibration"
+    )
 
 
 def run_local(args):
@@ -72,6 +75,8 @@ def run_local(args):
     ]
     if args.tenant_config:
         commands[-1].extend(["--tenant-config", args.tenant_config])
+    if args.placement_config:
+        commands[-1].extend(["--placement-config", args.placement_config])
     children = []
     stopping = False
 
@@ -129,6 +134,7 @@ def main():
     )
     serve = commands.add_parser("serve", help="Run the shared platform with a vLLM flavor")
     serve.add_argument("--tenant-config", help="Tenant policy JSON; API keys come from env")
+    serve.add_argument("--placement-config", help="Analytical TTFT model JSON")
     serve.add_argument("--profile", default="configs/macos-metal.json")
     serve.add_argument("--prefix-caching", action=argparse.BooleanOptionalAction, default=True)
     serve.add_argument("--context-guard", action=argparse.BooleanOptionalAction, default=True)
@@ -137,7 +143,7 @@ def main():
     serve.add_argument("--worker-ports", type=int, nargs="+")
     serve.add_argument(
         "--policy",
-        choices=["round_robin", "least_inflight", "prefix_affinity"],
+        choices=["round_robin", "least_inflight", "prefix_affinity", "predicted_ttft"],
         default="prefix_affinity",
     )
     serve.add_argument("--capacity", type=int, default=2)
@@ -172,7 +178,7 @@ def main():
     tenant_load.add_argument("--max-tokens", type=int, default=32)
     tenant_load.add_argument("--output", default="results/tenants-latest.json")
     experiment = commands.add_parser("experiment", help="Paired interview evidence batches")
-    experiment.add_argument("--batch", choices=["control", "metal"], default="control")
+    experiment.add_argument("--batch", choices=["control", "metal", "placement"], default="control")
     experiment.add_argument("--config", default="configs/experiments.local.json")
     experiment.add_argument("--output")
     experiment.add_argument("--profile", default="configs/macos-metal.json")

@@ -89,6 +89,30 @@ For a GPU-free demo, replace `serve` with `local --policy prefix_affinity
 `tenant-load --model nano-model`. Tenant API keys are generated into ignored
 `.local/tenants.env`; requests use `Authorization: Bearer <key>`.
 
+## Predicted TTFT placement
+
+Use `--policy predicted_ttft --placement-config configs/placement.example.json`
+with `local`, `gateway`, or `serve`. Token-cost WDRR still chooses the tenant;
+placement then minimizes an analytical estimate of queueing, uncached prefill,
+fixed overhead, and fresh native KV-pressure cost. Successful multi-length prefix
+hints can track several replicas; atomic work reservations distinguish long decode
+requests from short ones. Missing/stale engine metrics fall back to local estimates.
+
+The monitor shows score components; Prometheus exposes prediction distributions,
+absolute error, and SLO feasibility. Tenant TTFT budgets include time already spent
+in the gateway. Optional `slo_admission` rejects predicted misses before dispatch;
+it is **off by default** because the example service rates require calibration.
+This is deadline-aware placement/admission, not GPU preemption or an SLO guarantee.
+
+```bash
+uv run nano-inference experiment --batch placement
+uv run --extra tokenizer python scripts/smoke_placement.py
+```
+
+The first command retains paired CPU trials and all arrivals in the experiment
+report. The second verifies native routing/cache behavior on the prepared Mac;
+two replicas still share one Apple GPU. See [the model, knobs, results and limits](docs/predicted-routing.zh-CN.md).
+
 See [the multi-tenant guide](docs/multi-tenant.zh-CN.md) for configuration, exact
 accounting semantics, PromQL, verified native cache isolation and limitations.
 Request fairness does not guarantee hard latency isolation on a shared GPU.

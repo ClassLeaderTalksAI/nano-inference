@@ -1,0 +1,663 @@
+{
+  "schema_version": 1,
+  "batch": "placement",
+  "started_at_utc": "2026-10-19T13:54:09.773622+00:00",
+  "metadata": {
+    "git_head": "2849157ebdaa603ceeb8e974decaa5a93d51c0e0",
+    "working_tree_dirty": true,
+    "python_source_sha256": "8971e26f04f9f2b6d17a2d4bfc85d36c0737661e452365ab4cac20cd932f2ac8",
+    "python": "3.13.6",
+    "system": "Darwin",
+    "machine": "arm64"
+  },
+  "runtime": null,
+  "config": {
+    "repeats": 3,
+    "seed": 20261018,
+    "max_outstanding": 128,
+    "max_dispatch_lag_seconds": 0.05
+  },
+  "comparisons": [
+    {
+      "case": "placement",
+      "metric": "successful_first_content_seconds.p95",
+      "tenant": null,
+      "pairs": [
+        {
+          "repeat": 0,
+          "baseline": 0.1648245461823535,
+          "candidate": 0.010179833017173222,
+          "improvement_percent": 93.82383676888102,
+          "usable_for_comparison": true
+        },
+        {
+          "repeat": 1,
+          "baseline": 0.010202322587065282,
+          "candidate": 0.010089956234151027,
+          "improvement_percent": 1.10138012158834,
+          "usable_for_comparison": true
+        },
+        {
+          "repeat": 2,
+          "baseline": 0.009666635427856817,
+          "candidate": 0.010147168431649334,
+          "improvement_percent": -4.971047138156686,
+          "usable_for_comparison": true
+        }
+      ],
+      "median_improvement_percent": 1.10138012158834,
+      "assessment": "mixed_or_small_effect",
+      "note": "Descriptive paired differences only. Check failures, offered-load SLO attainment and throughput before making a claim; no causal GPU scaling claim."
+    },
+    {
+      "case": "placement_slo",
+      "metric": "ttft_slo_fraction_of_arrivals",
+      "tenant": null,
+      "pairs": [
+        {
+          "repeat": 0,
+          "baseline": 0.0625,
+          "candidate": 0.08333333333333333,
+          "improvement_percent": 33.33333333333333,
+          "usable_for_comparison": true
+        },
+        {
+          "repeat": 1,
+          "baseline": 0.041666666666666664,
+          "candidate": 0.0625,
+          "improvement_percent": 50.000000000000014,
+          "usable_for_comparison": true
+        },
+        {
+          "repeat": 2,
+          "baseline": 0.041666666666666664,
+          "candidate": 0.10416666666666667,
+          "improvement_percent": 150.0,
+          "usable_for_comparison": true
+        }
+      ],
+      "median_improvement_percent": 50.000000000000014,
+      "assessment": "consistent_directional_improvement",
+      "note": "Descriptive paired differences only. Check failures, offered-load SLO attainment and throughput before making a claim; no causal GPU scaling claim."
+    }
+  ],
+  "runs": [
+    {
+      "case": "placement",
+      "repeat": 0,
+      "variant": "baseline",
+      "artifact": "placement-0-baseline.json",
+      "summary": {
+        "requests": 60,
+        "outcomes": {
+          "success": 60
+        },
+        "elapsed_seconds": 0.9985950419941219,
+        "successful_requests_per_second": 60.08441608140208,
+        "output_tokens_per_second": 286.40238332134993,
+        "successful_requests_meeting_ttft_slo_per_second": 60.08441608140208,
+        "ttft_slo_seconds": 0.5,
+        "successful_first_content_seconds": {
+          "p50": 0.009504625661065802,
+          "p95": 0.1648245461823535
+        },
+        "successful_latency_seconds": {
+          "p50": 0.01396160449803574,
+          "p95": 0.17614330689684715
+        },
+        "max_dispatch_lag_seconds": 0.0482520419973298,
+        "successful_queue_seconds": {
+          "p50": 0.0,
+          "p95": 0.0
+        },
+        "successful_fraction_of_arrivals": 1.0,
+        "ttft_slo_fraction_of_arrivals": 1.0,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 0.033525955930235794,
+        "workers": {
+          "worker-1": 54,
+          "worker-2": 6
+        },
+        "error_codes": {},
+        "fixed_window_seconds": 1.4833333333333334,
+        "slo_goodput_fixed_window": 40.44943820224719
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      }
+    },
+    {
+      "case": "placement",
+      "repeat": 0,
+      "variant": "candidate",
+      "artifact": "placement-0-candidate.json",
+      "summary": {
+        "requests": 60,
+        "outcomes": {
+          "success": 60
+        },
+        "elapsed_seconds": 0.9947816659987438,
+        "successful_requests_per_second": 60.3147424714156,
+        "output_tokens_per_second": 287.500272447081,
+        "successful_requests_meeting_ttft_slo_per_second": 60.3147424714156,
+        "ttft_slo_seconds": 0.5,
+        "successful_first_content_seconds": {
+          "p50": 0.008891874666005606,
+          "p95": 0.010179833017173222
+        },
+        "successful_latency_seconds": {
+          "p50": 0.012219207997986814,
+          "p95": 0.014960589250040356
+        },
+        "max_dispatch_lag_seconds": 0.016615375003311783,
+        "successful_queue_seconds": {
+          "p50": 0.0,
+          "p95": 0.0
+        },
+        "successful_fraction_of_arrivals": 1.0,
+        "ttft_slo_fraction_of_arrivals": 1.0,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 0.0092671503500848,
+        "workers": {
+          "worker-1": 60
+        },
+        "error_codes": {},
+        "fixed_window_seconds": 1.4833333333333334,
+        "slo_goodput_fixed_window": 40.44943820224719
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      }
+    },
+    {
+      "case": "placement",
+      "repeat": 1,
+      "variant": "candidate",
+      "artifact": "placement-1-candidate.json",
+      "summary": {
+        "requests": 60,
+        "outcomes": {
+          "success": 60
+        },
+        "elapsed_seconds": 0.9949182499985909,
+        "successful_requests_per_second": 60.30646236520938,
+        "output_tokens_per_second": 285.4505885286577,
+        "successful_requests_meeting_ttft_slo_per_second": 60.30646236520938,
+        "ttft_slo_seconds": 0.5,
+        "successful_first_content_seconds": {
+          "p50": 0.00878739566906006,
+          "p95": 0.010089956234151027
+        },
+        "successful_latency_seconds": {
+          "p50": 0.011818666833278257,
+          "p95": 0.01496139374794438
+        },
+        "max_dispatch_lag_seconds": 0.01890033300151117,
+        "successful_queue_seconds": {
+          "p50": 0.0,
+          "p95": 0.0
+        },
+        "successful_fraction_of_arrivals": 1.0,
+        "ttft_slo_fraction_of_arrivals": 1.0,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 0.00928940346542125,
+        "workers": {
+          "worker-1": 60
+        },
+        "error_codes": {},
+        "fixed_window_seconds": 1.4833333333333334,
+        "slo_goodput_fixed_window": 40.44943820224719
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      }
+    },
+    {
+      "case": "placement",
+      "repeat": 1,
+      "variant": "baseline",
+      "artifact": "placement-1-baseline.json",
+      "summary": {
+        "requests": 60,
+        "outcomes": {
+          "success": 60
+        },
+        "elapsed_seconds": 0.9928939169985824,
+        "successful_requests_per_second": 60.42941644901392,
+        "output_tokens_per_second": 286.03257119199924,
+        "successful_requests_meeting_ttft_slo_per_second": 60.42941644901392,
+        "ttft_slo_seconds": 0.5,
+        "successful_first_content_seconds": {
+          "p50": 0.008694437332451344,
+          "p95": 0.010202322587065282
+        },
+        "successful_latency_seconds": {
+          "p50": 0.01148097949771909,
+          "p95": 0.015321349991427268
+        },
+        "max_dispatch_lag_seconds": 0.015179417001490947,
+        "successful_queue_seconds": {
+          "p50": 0.0,
+          "p95": 0.0
+        },
+        "successful_fraction_of_arrivals": 1.0,
+        "ttft_slo_fraction_of_arrivals": 1.0,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 0.009661521501887668,
+        "workers": {
+          "worker-1": 59,
+          "worker-2": 1
+        },
+        "error_codes": {},
+        "fixed_window_seconds": 1.4833333333333334,
+        "slo_goodput_fixed_window": 40.44943820224719
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      }
+    },
+    {
+      "case": "placement",
+      "repeat": 2,
+      "variant": "baseline",
+      "artifact": "placement-2-baseline.json",
+      "summary": {
+        "requests": 60,
+        "outcomes": {
+          "success": 60
+        },
+        "elapsed_seconds": 0.9933749169940711,
+        "successful_requests_per_second": 60.40015604738498,
+        "output_tokens_per_second": 267.7740251434068,
+        "successful_requests_meeting_ttft_slo_per_second": 60.40015604738498,
+        "ttft_slo_seconds": 0.5,
+        "successful_first_content_seconds": {
+          "p50": 0.008729958830372198,
+          "p95": 0.009666635427856817
+        },
+        "successful_latency_seconds": {
+          "p50": 0.011361333497916348,
+          "p95": 0.014556973263097461
+        },
+        "max_dispatch_lag_seconds": 0.01653824999812059,
+        "successful_queue_seconds": {
+          "p50": 0.0,
+          "p95": 0.0
+        },
+        "successful_fraction_of_arrivals": 1.0,
+        "ttft_slo_fraction_of_arrivals": 1.0,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 0.009773115513113832,
+        "workers": {
+          "worker-1": 59,
+          "worker-2": 1
+        },
+        "error_codes": {},
+        "fixed_window_seconds": 1.4833333333333334,
+        "slo_goodput_fixed_window": 40.44943820224719
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      }
+    },
+    {
+      "case": "placement",
+      "repeat": 2,
+      "variant": "candidate",
+      "artifact": "placement-2-candidate.json",
+      "summary": {
+        "requests": 60,
+        "outcomes": {
+          "success": 60
+        },
+        "elapsed_seconds": 0.9943104999983916,
+        "successful_requests_per_second": 60.343323338229915,
+        "output_tokens_per_second": 267.52206679948597,
+        "successful_requests_meeting_ttft_slo_per_second": 60.343323338229915,
+        "ttft_slo_seconds": 0.5,
+        "successful_first_content_seconds": {
+          "p50": 0.009019208326208172,
+          "p95": 0.010147168431649334
+        },
+        "successful_latency_seconds": {
+          "p50": 0.011606166826823028,
+          "p95": 0.01497330449419678
+        },
+        "max_dispatch_lag_seconds": 0.018055166998237837,
+        "successful_queue_seconds": {
+          "p50": 0.0,
+          "p95": 0.0
+        },
+        "successful_fraction_of_arrivals": 1.0,
+        "ttft_slo_fraction_of_arrivals": 1.0,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 0.009435019363445462,
+        "workers": {
+          "worker-1": 60
+        },
+        "error_codes": {},
+        "fixed_window_seconds": 1.4833333333333334,
+        "slo_goodput_fixed_window": 40.44943820224719
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      }
+    },
+    {
+      "case": "placement_slo",
+      "repeat": 0,
+      "variant": "baseline",
+      "artifact": "placement_slo-0-baseline.json",
+      "summary": {
+        "requests": 48,
+        "outcomes": {
+          "success": 48
+        },
+        "elapsed_seconds": 6.21604487500008,
+        "successful_requests_per_second": 7.721951975129424,
+        "output_tokens_per_second": 247.10246320414157,
+        "successful_requests_meeting_ttft_slo_per_second": 0.482621998445589,
+        "ttft_slo_seconds": 0.25,
+        "successful_first_content_seconds": {
+          "p50": 2.7593836880005256,
+          "p95": 5.23157837499748
+        },
+        "successful_latency_seconds": {
+          "p50": 2.8798265419973177,
+          "p95": 5.352513418747185
+        },
+        "max_dispatch_lag_seconds": 0.01708245900226757,
+        "successful_queue_seconds": {
+          "p50": 2.7427814375,
+          "p95": 5.213357225099999
+        },
+        "successful_fraction_of_arrivals": 1.0,
+        "ttft_slo_fraction_of_arrivals": 0.0625,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 2.7485277711665126,
+        "workers": {
+          "worker-1": 48
+        },
+        "error_codes": {},
+        "fixed_window_seconds": 0.8375,
+        "slo_goodput_fixed_window": 3.582089552238806
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      }
+    },
+    {
+      "case": "placement_slo",
+      "repeat": 0,
+      "variant": "candidate",
+      "artifact": "placement_slo-0-candidate.json",
+      "summary": {
+        "requests": 48,
+        "outcomes": {
+          "rejected": 41,
+          "success": 7
+        },
+        "elapsed_seconds": 0.8664008339983411,
+        "successful_requests_per_second": 8.079401271690607,
+        "output_tokens_per_second": 258.5408406940994,
+        "successful_requests_meeting_ttft_slo_per_second": 4.6168007266803475,
+        "ttft_slo_seconds": 0.25,
+        "successful_first_content_seconds": {
+          "p50": 0.24599870900419774,
+          "p95": 0.252492108802835
+        },
+        "successful_latency_seconds": {
+          "p50": 0.3537487920038984,
+          "p95": 0.359730467000918
+        },
+        "max_dispatch_lag_seconds": 0.015345874999184161,
+        "successful_queue_seconds": {
+          "p50": 0.228788042,
+          "p95": 0.2334287837
+        },
+        "successful_fraction_of_arrivals": 0.14583333333333334,
+        "ttft_slo_fraction_of_arrivals": 0.08333333333333333,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 0.2037233277172033,
+        "workers": {
+          "worker-1": 7
+        },
+        "error_codes": {
+          "slo_budget_exceeded": 41
+        },
+        "fixed_window_seconds": 0.8375,
+        "slo_goodput_fixed_window": 4.776119402985074
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      }
+    },
+    {
+      "case": "placement_slo",
+      "repeat": 1,
+      "variant": "candidate",
+      "artifact": "placement_slo-1-candidate.json",
+      "summary": {
+        "requests": 48,
+        "outcomes": {
+          "rejected": 41,
+          "success": 7
+        },
+        "elapsed_seconds": 0.9344317499999306,
+        "successful_requests_per_second": 7.491183813050573,
+        "output_tokens_per_second": 239.71788201761834,
+        "successful_requests_meeting_ttft_slo_per_second": 3.2105073484502458,
+        "ttft_slo_seconds": 0.25,
+        "successful_first_content_seconds": {
+          "p50": 0.2540733750065556,
+          "p95": 0.2641278294970107
+        },
+        "successful_latency_seconds": {
+          "p50": 0.3628500000049826,
+          "p95": 0.38097107939756825
+        },
+        "max_dispatch_lag_seconds": 0.027217041999392677,
+        "successful_queue_seconds": {
+          "p50": 0.228102041,
+          "p95": 0.2347726795
+        },
+        "successful_fraction_of_arrivals": 0.14583333333333334,
+        "ttft_slo_fraction_of_arrivals": 0.0625,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 0.21283849442884925,
+        "workers": {
+          "worker-1": 7
+        },
+        "error_codes": {
+          "slo_budget_exceeded": 41
+        },
+        "fixed_window_seconds": 0.8375,
+        "slo_goodput_fixed_window": 3.582089552238806
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      }
+    },
+    {
+      "case": "placement_slo",
+      "repeat": 1,
+      "variant": "baseline",
+      "artifact": "placement_slo-1-baseline.json",
+      "summary": {
+        "requests": 48,
+        "outcomes": {
+          "success": 48
+        },
+        "elapsed_seconds": 6.597580957997707,
+        "successful_requests_per_second": 7.275393861111099,
+        "output_tokens_per_second": 232.81260355555517,
+        "successful_requests_meeting_ttft_slo_per_second": 0.30314141087962915,
+        "ttft_slo_seconds": 0.25,
+        "successful_first_content_seconds": {
+          "p50": 2.755266957996355,
+          "p95": 5.613605022246702
+        },
+        "successful_latency_seconds": {
+          "p50": 2.8858409369968285,
+          "p95": 5.721400655695106
+        },
+        "max_dispatch_lag_seconds": 0.021973540999169927,
+        "successful_queue_seconds": {
+          "p50": 2.736778062,
+          "p95": 5.5956010335499995
+        },
+        "successful_fraction_of_arrivals": 1.0,
+        "ttft_slo_fraction_of_arrivals": 0.041666666666666664,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 2.8707787843947394,
+        "workers": {
+          "worker-1": 48
+        },
+        "error_codes": {},
+        "fixed_window_seconds": 0.8375,
+        "slo_goodput_fixed_window": 2.388059701492537
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      }
+    },
+    {
+      "case": "placement_slo",
+      "repeat": 2,
+      "variant": "baseline",
+      "artifact": "placement_slo-2-baseline.json",
+      "summary": {
+        "requests": 48,
+        "outcomes": {
+          "success": 48
+        },
+        "elapsed_seconds": 6.360560958004498,
+        "successful_requests_per_second": 7.546504202525411,
+        "output_tokens_per_second": 241.48813448081316,
+        "successful_requests_meeting_ttft_slo_per_second": 0.31443767510522547,
+        "ttft_slo_seconds": 0.25,
+        "successful_first_content_seconds": {
+          "p50": 2.754906166501314,
+          "p95": 5.337564045402542
+        },
+        "successful_latency_seconds": {
+          "p50": 2.876835562001361,
+          "p95": 5.459415099452235
+        },
+        "max_dispatch_lag_seconds": 0.015256750004482456,
+        "successful_queue_seconds": {
+          "p50": 2.739039146,
+          "p95": 5.3189770228
+        },
+        "successful_fraction_of_arrivals": 1.0,
+        "ttft_slo_fraction_of_arrivals": 0.041666666666666664,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 2.7896010257101502,
+        "workers": {
+          "worker-1": 48
+        },
+        "error_codes": {},
+        "fixed_window_seconds": 0.8375,
+        "slo_goodput_fixed_window": 2.388059701492537
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      }
+    },
+    {
+      "case": "placement_slo",
+      "repeat": 2,
+      "variant": "candidate",
+      "artifact": "placement_slo-2-candidate.json",
+      "summary": {
+        "requests": 48,
+        "outcomes": {
+          "rejected": 41,
+          "success": 7
+        },
+        "elapsed_seconds": 0.8975685409968719,
+        "successful_requests_per_second": 7.798847308335415,
+        "output_tokens_per_second": 249.5631138667333,
+        "successful_requests_meeting_ttft_slo_per_second": 5.570605220239583,
+        "ttft_slo_seconds": 0.25,
+        "successful_first_content_seconds": {
+          "p50": 0.2463184160005767,
+          "p95": 0.2618070534997969
+        },
+        "successful_latency_seconds": {
+          "p50": 0.35179733299446525,
+          "p95": 0.3678964705992257
+        },
+        "max_dispatch_lag_seconds": 0.017156082998553757,
+        "successful_queue_seconds": {
+          "p50": 0.225156167,
+          "p95": 0.2354567713
+        },
+        "successful_fraction_of_arrivals": 0.14583333333333334,
+        "ttft_slo_fraction_of_arrivals": 0.10416666666666667,
+        "note": "First content is a client observation; content events are not token counts.",
+        "first_content_mean_seconds": 0.20708708885649685,
+        "workers": {
+          "worker-1": 7
+        },
+        "error_codes": {
+          "slo_budget_exceeded": 41
+        },
+        "fixed_window_seconds": 0.8375,
+        "slo_goodput_fixed_window": 5.970149253731343
+      },
+      "tenants": {},
+      "quality": {
+        "usable_for_comparison": true,
+        "flags": [],
+        "max_allowed_dispatch_lag_seconds": 0.05,
+        "statistical_significance": "not_established"
+      }
+    }
+  ],
+  "scope": "Simulator isolates control-plane logic. Metal replicas share one physical Apple GPU. Small local batches do not establish production SLOs or NVIDIA scaling. Exploratory summary before equal HTTP/tokenizer warmup was added. Superseded for comparisons; this snapshot retains summary statistics, not all early raw requests."
+}

@@ -16,7 +16,7 @@ def render_report(root, source=None):
     root = Path(root)
     sections = []
     override = None if source is None else json.loads((Path(source) / "summary.json").read_text())
-    for batch in ("control", "metal"):
+    for batch in ("control", "metal", "placement"):
         path = root / batch / "summary.json"
         if override is not None and override["batch"] == batch:
             data = override

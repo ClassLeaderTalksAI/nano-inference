@@ -1,0 +1,270 @@
+{
+  "checked_at_utc": "2026-10-19T13:57:26.330726+00:00",
+  "metadata": {
+    "git_head": "2849157ebdaa603ceeb8e974decaa5a93d51c0e0",
+    "working_tree_dirty": true,
+    "python_source_sha256": "b7237175e3184d84b0b36bc077242fa24789c06ccb95360a3a88a72d800a3514",
+    "python": "3.13.6",
+    "system": "Darwin",
+    "machine": "arm64"
+  },
+  "runtime": {
+    "python": "3.12.11",
+    "packages": {
+      "vllm": "0.31.0+cpu",
+      "vllm-metal": "0.31.0",
+      "mlx": "0.32.1",
+      "mlx-lm": "0.32.0",
+      "transformers": "5.17.0"
+    },
+    "accelerator": {
+      "device_name": "Apple M1 Pro",
+      "max_recommended_working_set_size": 26800603136,
+      "memory_size": 34359738368,
+      "architecture": "applegpu_g13s",
+      "max_buffer_length": 20100448256,
+      "resource_limit": 499000
+    },
+    "metal_computation": [
+      1.0,
+      4.0,
+      9.0
+    ]
+  },
+  "checks": [
+    {
+      "tenant": "interactive",
+      "result": {
+        "index": 0,
+        "outcome": "success",
+        "http_status": 200,
+        "worker": "worker-1",
+        "latency_seconds": 3.201560708002944,
+        "dispatch_lag_seconds": 2.9082999390084296e-05,
+        "first_content_seconds": 3.0815204579994315,
+        "completion_tokens": 5,
+        "content_events": 4,
+        "route_decision": "predicted_ttft",
+        "prompt_tokens": 436,
+        "error_code": null,
+        "tenant": null,
+        "queue_seconds": 9.575e-05,
+        "last_content_seconds": 3.188679167004011,
+        "predicted_ttft_seconds": 0.456
+      },
+      "prediction": {
+        "queue_seconds": 0.0,
+        "prefill_seconds": 0.436,
+        "kv_seconds": 0.0,
+        "base_seconds": 0.02,
+        "cached_tokens": 0,
+        "native_fresh": true,
+        "kv_cache_fraction": 0.0,
+        "remaining_budget_seconds": 4.985909625000204,
+        "ttft_seconds": 0.456,
+        "slo_feasible": true
+      },
+      "cache": [
+        {
+          "hit_tokens": 0.0,
+          "queried_tokens": 436.0,
+          "token_hit_ratio": 0.0
+        },
+        {
+          "hit_tokens": 0.0,
+          "queried_tokens": 0.0,
+          "token_hit_ratio": null
+        }
+      ]
+    },
+    {
+      "tenant": "interactive",
+      "result": {
+        "index": 1,
+        "outcome": "success",
+        "http_status": 200,
+        "worker": "worker-1",
+        "latency_seconds": 0.1935590829962166,
+        "dispatch_lag_seconds": 4.374996933620423e-06,
+        "first_content_seconds": 0.07977045799634652,
+        "completion_tokens": 5,
+        "content_events": 4,
+        "route_decision": "predicted_ttft",
+        "prompt_tokens": 436,
+        "error_code": null,
+        "tenant": null,
+        "queue_seconds": 6.7375e-05,
+        "last_content_seconds": 0.16682449999643723,
+        "predicted_ttft_seconds": 0.1488
+      },
+      "prediction": {
+        "queue_seconds": 0.0,
+        "prefill_seconds": 0.12879999999999994,
+        "kv_seconds": 0.0,
+        "base_seconds": 0.02,
+        "cached_tokens": 384,
+        "native_fresh": true,
+        "kv_cache_fraction": 0.0,
+        "remaining_budget_seconds": 4.998407583007065,
+        "ttft_seconds": 0.14879999999999993,
+        "slo_feasible": true
+      },
+      "cache": [
+        {
+          "hit_tokens": 432.0,
+          "queried_tokens": 436.0,
+          "token_hit_ratio": 0.9908256880733946
+        },
+        {
+          "hit_tokens": 0.0,
+          "queried_tokens": 0.0,
+          "token_hit_ratio": null
+        }
+      ]
+    },
+    {
+      "tenant": "batch",
+      "result": {
+        "index": 2,
+        "outcome": "success",
+        "http_status": 200,
+        "worker": "worker-2",
+        "latency_seconds": 2.68214970799454,
+        "dispatch_lag_seconds": 1.8749997252598405e-06,
+        "first_content_seconds": 2.554492499999469,
+        "completion_tokens": 5,
+        "content_events": 4,
+        "route_decision": "predicted_ttft",
+        "prompt_tokens": 436,
+        "error_code": null,
+        "tenant": null,
+        "queue_seconds": 5.3334e-05,
+        "last_content_seconds": 2.6527387499954784,
+        "predicted_ttft_seconds": 0.456
+      },
+      "prediction": {
+        "queue_seconds": 0.0,
+        "prefill_seconds": 0.436,
+        "kv_seconds": 0.0,
+        "base_seconds": 0.02,
+        "cached_tokens": 0,
+        "native_fresh": true,
+        "kv_cache_fraction": 0.0,
+        "remaining_budget_seconds": 29.998604583000997,
+        "ttft_seconds": 0.456,
+        "slo_feasible": true
+      },
+      "cache": [
+        {
+          "hit_tokens": 0.0,
+          "queried_tokens": 0.0,
+          "token_hit_ratio": null
+        },
+        {
+          "hit_tokens": 0.0,
+          "queried_tokens": 436.0,
+          "token_hit_ratio": 0.0
+        }
+      ]
+    },
+    {
+      "tenant": "batch",
+      "result": {
+        "index": 3,
+        "outcome": "success",
+        "http_status": 200,
+        "worker": "worker-2",
+        "latency_seconds": 0.2011500829976285,
+        "dispatch_lag_seconds": 4.374996933620423e-06,
+        "first_content_seconds": 0.08166583300044294,
+        "completion_tokens": 5,
+        "content_events": 4,
+        "route_decision": "predicted_ttft",
+        "prompt_tokens": 436,
+        "error_code": null,
+        "tenant": null,
+        "queue_seconds": 6.1792e-05,
+        "last_content_seconds": 0.17144025000015972,
+        "predicted_ttft_seconds": 0.1488
+      },
+      "prediction": {
+        "queue_seconds": 0.0,
+        "prefill_seconds": 0.12879999999999994,
+        "kv_seconds": 0.0,
+        "base_seconds": 0.02,
+        "cached_tokens": 384,
+        "native_fresh": true,
+        "kv_cache_fraction": 0.0,
+        "remaining_budget_seconds": 29.998594625001715,
+        "ttft_seconds": 0.14879999999999993,
+        "slo_feasible": true
+      },
+      "cache": [
+        {
+          "hit_tokens": 0.0,
+          "queried_tokens": 0.0,
+          "token_hit_ratio": null
+        },
+        {
+          "hit_tokens": 432.0,
+          "queried_tokens": 436.0,
+          "token_hit_ratio": 0.9908256880733946
+        }
+      ]
+    }
+  ],
+  "final_placement": {
+    "model": "analytical-ttft-v1",
+    "cache_tracking": "approximate-success-history",
+    "config": {
+      "service": {
+        "base_seconds": 0.02,
+        "prefill_tokens_per_second": 1000.0,
+        "decode_tokens_per_second": 40.0,
+        "parallelism": 1.0
+      },
+      "workers": {},
+      "cache_capacity": 4096,
+      "cache_ttl_seconds": 30.0,
+      "cache_reuse_discount": 0.8,
+      "metrics_max_age_seconds": 5.0,
+      "external_request_seconds": 0.5,
+      "kv_soft_limit": 0.8,
+      "kv_penalty_seconds": 0.5,
+      "default_slo_seconds": 2.0,
+      "slo_admission": false,
+      "slo_safety_factor": 1.2
+    },
+    "cache_entries": 6,
+    "active_reservations": 0,
+    "last_choice": "worker-2",
+    "last_scores": {
+      "worker-1": {
+        "queue_seconds": 0.0,
+        "prefill_seconds": 0.436,
+        "kv_seconds": 0.0,
+        "base_seconds": 0.02,
+        "cached_tokens": 0,
+        "native_fresh": true,
+        "kv_cache_fraction": 0.0,
+        "remaining_budget_seconds": 29.998607625006116,
+        "ttft_seconds": 0.456,
+        "slo_feasible": true
+      },
+      "worker-2": {
+        "queue_seconds": 0.0,
+        "prefill_seconds": 0.12879999999999994,
+        "kv_seconds": 0.0,
+        "base_seconds": 0.02,
+        "cached_tokens": 384,
+        "native_fresh": true,
+        "kv_cache_fraction": 0.0,
+        "remaining_budget_seconds": 29.998594625001715,
+        "ttft_seconds": 0.14879999999999993,
+        "slo_feasible": true
+      }
+    }
+  },
+  "ports_closed": true,
+  "scope": "Two replicas share one Apple GPU. Four sequential requests verify native cache namespaces and routing observability, not performance improvement or SLO goodput. Service rates are uncalibrated example priors; compare predictions with observations."
+}

@@ -18,6 +18,7 @@ from fastapi.responses import JSONResponse, Response, StreamingResponse
 from prometheus_client import CollectorRegistry, Counter, Gauge, Histogram, generate_latest
 
 from .monitoring import Monitor
+from .placement import PlacementConfig, RouteRequest
 from .prefix import PrefixEncoder, PrefixPreparer, digest
 from .protocol import ChatRequest, has_content, sse, sse_data
 from .routing import AdmissionError, Lease, Policy, WorkerPool
@@ -48,6 +49,7 @@ class Settings:
     affinity_max_skew: int = 1
     tenant_config: str | None = None
     max_model_len: int | None = None
+    placement_config: str | None = None
 
     def __post_init__(self):
         if self.max_model_len is not None and self.max_model_len < 1:
@@ -58,7 +60,9 @@ class Settings:
         if self.prefix_tokens < 1 or self.prefix_preparations < 1 or not self.model_revision:
             raise ValueError("Prefix settings require positive counts and a model revision")
         if (
-            self.policy == "prefix_affinity" or self.tenant_config or self.max_model_len
+            self.policy in ("prefix_affinity", "predicted_ttft")
+            or self.tenant_config
+            or self.max_model_len
         ) and self.model != "nano-model":
             if not self.prefix_tokenizer or self.model_revision == "simulator-v1":
                 raise ValueError(
@@ -101,9 +105,28 @@ def create_gateway(
         settings.affinity_capacity,
         settings.affinity_ttl,
         settings.affinity_max_skew,
+        placement=PlacementConfig.load(settings.placement_config),
         **({"tenants": tenant_config} if tenant_config else {}),
     )
     registry = CollectorRegistry()
+    prediction_seconds = Histogram(
+        "nano_route_predicted_ttft_seconds",
+        "Estimated remaining TTFT at dispatch",
+        ["worker"],
+        registry=registry,
+    )
+    prediction_error = Histogram(
+        "nano_route_prediction_absolute_error_seconds",
+        "Absolute first-content prediction error",
+        ["worker"],
+        registry=registry,
+    )
+    prediction_slo = Counter(
+        "nano_route_slo_predictions_total",
+        "SLO feasibility at dispatch; not a guarantee",
+        ["tenant", "feasible"],
+        registry=registry,
+    )
     completed = Counter(
         "nano_requests_total", "Completed request lifecycles", ["outcome"], registry=registry
     )
@@ -218,7 +241,11 @@ def create_gateway(
 
     @asynccontextmanager
     async def lifespan(app):
-        if settings.policy == "prefix_affinity" or tenant_config or settings.max_model_len:
+        if (
+            settings.policy in ("prefix_affinity", "predicted_ttft")
+            or tenant_config
+            or settings.max_model_len
+        ):
             encoder = prefix_encoder
             if encoder is None:
                 if settings.prefix_tokenizer and settings.model != "nano-model":
@@ -304,12 +331,14 @@ def create_gateway(
         if body.model != settings.model:
             return JSONResponse({"error": {"code": "unknown_model"}}, status_code=404)
         started = time.perf_counter()
+        arrival = time.monotonic()
         deadline = asyncio.get_running_loop().time() + settings.request_timeout
         request_id = uuid.uuid4().hex
         lease: Lease | None = None
         upstream: httpx.Response | None = None
         outcome = "cancelled"
         first_seconds: float | None = None
+        dispatched_at: float | None = None
         usage: dict = {}
         cleaned = False
 
@@ -357,6 +386,9 @@ def create_gateway(
                             "duration_seconds": elapsed,
                             "prompt_tokens": usage.get("prompt_tokens"),
                             "output_tokens": usage.get("completion_tokens"),
+                            "predicted_ttft_seconds": lease.prediction.ttft_seconds
+                            if lease and lease.prediction
+                            else None,
                         }
                     )
                 )
@@ -399,11 +431,19 @@ def create_gateway(
             async with asyncio.timeout_at(deadline):
                 key = None
                 input_tokens = 0
+                prefixes = ()
                 if app.state.preparer:
                     if sum(len(m.content) for m in body.messages) > 200_000:
                         outcome = "prefix_input_too_large"
                         return error(413, outcome)
-                    if tenant_config or settings.max_model_len:
+                    if settings.policy == "predicted_ttft":
+                        key, input_tokens, prefixes = await app.state.preparer.routing_features(
+                            body.messages
+                        )
+                        if tenant_config:
+                            key = digest([tenant_id, key]) if key is not None else None
+                            prefixes = tuple((digest([tenant_id, k]), n) for k, n in prefixes)
+                    elif tenant_config or settings.max_model_len:
                         key, input_tokens = await app.state.preparer.prepare(body.messages)
                         if tenant_config:
                             key = digest([tenant_id, key]) if key is not None else None
@@ -418,6 +458,28 @@ def create_gateway(
                     key,
                     **(
                         {
+                            "route_request": RouteRequest(
+                                input_tokens=input_tokens,
+                                output_tokens=min(
+                                    body.max_tokens,
+                                    pool.states[tenant_id].config.expected_output_tokens,
+                                )
+                                if tenant_config
+                                else body.max_tokens,
+                                prefixes=prefixes,
+                                deadline=arrival
+                                + (
+                                    pool.states[tenant_id].config.ttft_slo_seconds
+                                    if tenant_config
+                                    else pool.placement.config.default_slo_seconds
+                                ),
+                            )
+                        }
+                        if settings.policy == "predicted_ttft"
+                        else {}
+                    ),
+                    **(
+                        {
                             "tenant": tenant_id,
                             "input_tokens": input_tokens,
                             "max_tokens": body.max_tokens,
@@ -427,6 +489,14 @@ def create_gateway(
                     ),
                 )
                 route_decisions.labels(lease.decision).inc()
+                dispatched_at = time.perf_counter()
+                if lease.prediction:
+                    prediction_seconds.labels(lease.worker.name).observe(
+                        lease.prediction.ttft_seconds
+                    )
+                    prediction_slo.labels(
+                        tenant_id, str(lease.prediction.slo_feasible).lower()
+                    ).inc()
                 queue_delay.observe(lease.queue_seconds)
                 tenant_queue.labels(tenant_id).observe(lease.queue_seconds)
                 payload = body.model_dump(exclude_none=True)
@@ -451,6 +521,11 @@ def create_gateway(
                     "X-Worker-ID": lease.worker.name,
                     "X-Route-Decision": lease.decision,
                     "X-Queue-Seconds": f"{lease.queue_seconds:.9f}",
+                    **(
+                        {"X-Predicted-TTFT-Seconds": f"{lease.prediction.ttft_seconds:.9f}"}
+                        if lease.prediction
+                        else {}
+                    ),
                 }
                 if not body.stream:
                     data = json.loads(await upstream.aread())
@@ -486,6 +561,11 @@ def create_gateway(
                                 first_seconds = time.perf_counter() - started
                                 first_content.observe(first_seconds)
                                 tenant_ttft.labels(tenant_id).observe(first_seconds)
+                                if lease.prediction:
+                                    observed = time.perf_counter() - dispatched_at
+                                    prediction_error.labels(lease.worker.name).observe(
+                                        abs(observed - lease.prediction.ttft_seconds)
+                                    )
                             saw_finish |= any(
                                 c.get("finish_reason") is not None for c in event.get("choices", [])
                             )

@@ -86,17 +86,40 @@ class Monitor:
             self.up.labels(w.name).set(0)
             for gauge in self.native.values():
                 gauge.labels(w.name).set(float("nan"))
+        for field in (
+            "ttft_seconds",
+            "queue_seconds",
+            "prefill_seconds",
+            "kv_seconds",
+            "cached_tokens",
+        ):
+            gauge = Gauge(
+                "nano_route_last_" + field,
+                "Last candidate score (approximate)",
+                ["worker"],
+                registry=registry,
+            )
+            for w in pool.workers:
+
+                def value(worker=w.name, attr=field):
+                    prediction = pool.placement.last_scores.get(worker)
+                    return getattr(prediction, attr) if prediction else float("nan")
+
+                gauge.labels(w.name).set_function(value)
 
     async def poll(self):
         async def one(worker):
+            generation = worker.generation
             try:
                 async with asyncio.timeout(1):
                     data = await engine_snapshot(self.app.state.client, worker.url)
                 self.engines[worker.name] = {"available": True, "sampled_at": time.time(), **data}
                 self.up.labels(worker.name).set(1)
+                await self.pool.observe_native(worker, generation, data["values"])
                 for name, gauge in self.native.items():
                     gauge.labels(worker.name).set(data["values"].get("vllm:" + name, float("nan")))
             except (httpx.HTTPError, TimeoutError, ValueError):
+                await self.pool.observe_native(worker, generation, None)
                 self.engines[worker.name] = {
                     "available": False,
                     "sampled_at": time.time(),

@@ -31,6 +31,7 @@ class Result:
     tenant: str | None = None
     queue_seconds: float | None = None
     last_content_seconds: float | None = None
+    predicted_ttft_seconds: float | None = None
 
 
 def workload_messages(index: int, workload: str, groups: int, repetitions: int) -> list[dict]:
@@ -84,6 +85,8 @@ async def send_request(
             result.http_status = response.status_code
             result.worker = response.headers.get("x-worker-id")
             result.route_decision = response.headers.get("x-route-decision")
+            if response.headers.get("x-predicted-ttft-seconds"):
+                result.predicted_ttft_seconds = float(response.headers["x-predicted-ttft-seconds"])
             if response.headers.get("x-queue-seconds"):
                 result.queue_seconds = float(response.headers["x-queue-seconds"])
             if response.status_code != 200:

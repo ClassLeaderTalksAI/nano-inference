@@ -11,9 +11,10 @@ from collections import Counter, deque
 from dataclasses import dataclass
 from typing import Literal
 
+from .placement import Placement, PlacementConfig, Prediction, RouteRequest
 from .prefix import AffinityTable
 
-Policy = Literal["round_robin", "least_inflight", "prefix_affinity"]
+Policy = Literal["round_robin", "least_inflight", "prefix_affinity", "predicted_ttft"]
 
 
 class AdmissionError(Exception):
@@ -45,6 +46,8 @@ class Lease:
     estimated_cost: float = 0
     reserved_tokens: int = 0
     reserved_cost: float = 0
+    route_request: RouteRequest | None = None
+    prediction: Prediction | None = None
 
 
 class WorkerPool:
@@ -58,13 +61,15 @@ class WorkerPool:
         affinity_capacity: int = 1024,
         affinity_ttl: float = 60,
         affinity_max_skew: int = 1,
+        *,
+        placement: PlacementConfig | None = None,
     ):
         urls = [url.rstrip("/") for url in urls]
         if not urls or len(set(urls)) != len(urls):
             raise ValueError("Provide at least one distinct worker URL")
         if capacity < 1 or max_queue < 0 or not math.isfinite(queue_timeout) or queue_timeout <= 0:
             raise ValueError("Invalid admission limits")
-        if policy not in ("round_robin", "least_inflight", "prefix_affinity"):
+        if policy not in ("round_robin", "least_inflight", "prefix_affinity", "predicted_ttft"):
             raise ValueError("Unknown routing policy")
         if affinity_max_skew < 0:
             raise ValueError("Affinity load skew must be nonnegative")
@@ -79,9 +84,15 @@ class WorkerPool:
         self.affinity = AffinityTable(affinity_capacity, affinity_ttl)
         self.affinity_max_skew = affinity_max_skew
         self.decisions: Counter[str] = Counter()
+        self.placement = Placement(placement or PlacementConfig())
+        if set(self.placement.config.workers) - {w.name for w in self.workers}:
+            raise ValueError("Unknown worker in placement model")
 
     def _select(
-        self, prefix_key: str | None, allowed: list[str] | None = None
+        self,
+        prefix_key: str | None,
+        allowed: list[str] | None = None,
+        route_request: RouteRequest | None = None,
     ) -> tuple[Worker, str] | None:
         ordered = self.workers[self.cursor :] + self.workers[: self.cursor]
         candidates = [
@@ -97,6 +108,10 @@ class WorkerPool:
             else min(candidates, key=lambda w: w.inflight)
         )
         decision = self.policy
+        if self.policy == "predicted_ttft":
+            worker = self.placement.select_worker(route_request or RouteRequest(), candidates)
+            prediction = self.placement.last_scores[worker.name]
+            decision = "predicted_ttft" if prediction.native_fresh else "predicted_ttft_local"
         if self.policy == "prefix_affinity":
             decision = "prefix_too_short" if prefix_key is None else "affinity_miss"
             hint = self.affinity.get(prefix_key)
@@ -113,41 +128,82 @@ class WorkerPool:
         self.cursor = (self.workers.index(worker) + 1) % len(self.workers)
         return worker, decision
 
-    def _reserve(self, selection, prefix_key, waited):
+    def _reserve(self, selection, prefix_key, waited, route_request=None):
         worker, decision = selection
+        prediction = None
+        if self.policy == "predicted_ttft":
+            route_request = route_request or RouteRequest()
+            prediction = self.placement.last_scores[worker.name]
+            if self.placement.config.slo_admission and prediction.slo_feasible is False:
+                self.decisions["slo_budget_exceeded"] += 1
+                raise AdmissionError(429, "slo_budget_exceeded")
         worker.inflight += 1
         self.decisions[decision] += 1
-        return Lease(worker, worker.generation, waited, prefix_key=prefix_key, decision=decision)
+        lease = Lease(
+            worker,
+            worker.generation,
+            waited,
+            prefix_key=prefix_key,
+            decision=decision,
+            route_request=route_request,
+            prediction=prediction,
+        )
+        if prediction:
+            self.placement.reserve(lease, route_request)
+        return lease
 
-    async def acquire(self, prefix_key: str | None = None) -> Lease:
+    async def acquire(
+        self, prefix_key: str | None = None, *, route_request: RouteRequest | None = None
+    ) -> Lease:
         started = time.perf_counter()
         ticket = object()
         async with self.condition:
             if not any(w.healthy for w in self.workers):
                 raise AdmissionError(503, "no_healthy_workers")
-            selected = self._select(prefix_key) if not self.waiters else None
+            selected = (
+                self._select(prefix_key, route_request=route_request) if not self.waiters else None
+            )
             if selected is not None:
-                return self._reserve(selected, prefix_key, 0)
+                return self._reserve(selected, prefix_key, 0, route_request)
             if len(self.waiters) >= self.max_queue:
                 raise AdmissionError(429, "queue_full")
             self.waiters.append(ticket)
             try:
-                async with asyncio.timeout(self.queue_timeout):
+                async with asyncio.timeout(self.wait_budget(route_request)):
                     while True:
                         if not any(w.healthy for w in self.workers):
                             raise AdmissionError(503, "no_healthy_workers")
                         if self.waiters[0] is ticket:
-                            selected = self._select(prefix_key)
+                            selected = self._select(prefix_key, route_request=route_request)
                             if selected is not None:
                                 return self._reserve(
-                                    selected, prefix_key, time.perf_counter() - started
+                                    selected,
+                                    prefix_key,
+                                    time.perf_counter() - started,
+                                    route_request,
                                 )
                         await self.condition.wait()
             except TimeoutError as exc:
-                raise AdmissionError(429, "queue_timeout") from exc
+                raise AdmissionError(429, self.wait_timeout_code(route_request)) from exc
             finally:
                 self.waiters.remove(ticket)
                 self.condition.notify_all()
+
+    def wait_budget(self, request):
+        if self.policy == "predicted_ttft" and self.placement.config.slo_admission:
+            if request and request.deadline is not None:
+                return max(0, min(self.queue_timeout, request.deadline - self.placement.clock()))
+        return self.queue_timeout
+
+    def wait_timeout_code(self, request):
+        if request and request.deadline is not None and self.wait_budget(request) <= 0:
+            return "slo_budget_exceeded"
+        return "queue_timeout"
+
+    async def observe_native(self, worker, generation, values):
+        async with self.condition:
+            if worker.healthy and worker.generation == generation:
+                self.placement.observe(worker.name, generation, values)
 
     async def release(self, lease: Lease, *, successful: bool = False) -> None:
         async with self.condition:
@@ -156,6 +212,13 @@ class WorkerPool:
 
     def _release(self, lease, successful):
         if not lease.released:
+            if lease.prediction:
+                self.placement.release(
+                    lease,
+                    successful
+                    and lease.worker.healthy
+                    and lease.worker.generation == lease.generation,
+                )
             if (
                 successful
                 and self.policy == "prefix_affinity"
@@ -177,6 +240,7 @@ class WorkerPool:
             if worker.healthy != healthy:
                 worker.generation += 1
                 self.affinity.invalidate(worker.name)
+                self.placement.invalidate(worker.name)
             worker.healthy = healthy
             worker.last_health_check = time.time()
             self.condition.notify_all()
@@ -190,6 +254,7 @@ class WorkerPool:
             "max_queue": self.max_queue,
             "queue_timeout_seconds": self.queue_timeout,
             "route_decisions": dict(self.decisions),
+            "placement": self.placement.snapshot() if self.policy == "predicted_ttft" else None,
             "affinity": {
                 "entries": len(self.affinity.entries),
                 "capacity": self.affinity.capacity,

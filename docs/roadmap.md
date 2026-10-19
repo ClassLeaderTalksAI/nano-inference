@@ -19,6 +19,7 @@ continuous batching, and KV-cache allocation.
 | 6 — Mac Metal flavor | Native vLLM Metal runtime, pinned MLX model and shared platform | Two real local replicas, engine cache/queue metrics, cancellation, overload and restart |
 | 6b — Multi-tenant and monitoring | Identity, quotas, per-tenant queues, WDRR, cache salts, local dashboard | Token-cost fairness; independent admission; native cross-tenant cache counter checks; visible failures |
 | 6c — Controlled experiments | Paired workload replay, quality gates, warm-cache negative control, context guard, narrative | Raw trials and failures retained; simulator vs native scope explicit; neutral results preserved |
+| 6d — Predicted TTFT placement | Multi-length replica cache hints, atomic work estimates, native load/KV feedback, opt-in SLO admission | Explainable scores/error metrics; WDRR fairness unchanged; deadline rejection releases ledgers; CPU paired trials and native Mac smoke |
 | 7 — Linux CUDA flavor | Entire platform on RunPod with pinned CUDA runtime and model | First one GPU, then two independent GPU replicas; repeat the same acceptance checks |
 | 8 — Analysis | Raw data, configuration, plots and documented limitations | Every performance claim traceable to measured runs |
 
@@ -36,6 +37,9 @@ and `results/macos-metal/tenants/`. Local monitoring is built in; a separate Pro
 service is optional and has not been installed. Local paired comparisons are now recorded in `results/experiments/`; see the
 [experiment lab](interview-lab.zh-CN.md) and [measured narrative](interview-results.zh-CN.md).
 Longer statistical studies and CUDA policy comparisons remain pending.
+Milestone 6d is implemented; see [the prediction model and limits](predicted-routing.zh-CN.md).
+Service-rate calibration and real KV-event tracking remain future work. SLO-aware
+placement/admission does not implement tenant priority boosts or engine preemption.
 CLI and request fields may evolve as real backend integration reveals differences.
 
 ## Model and hardware starting point

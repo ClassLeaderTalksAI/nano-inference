@@ -449,10 +449,16 @@
           );
           card.append(head);
           const pairs = node("div", null, "pairs"),
+            prediction = d.pool.placement?.last_scores?.[w.id],
             kv = v["vllm:kv_cache_usage_perc"],
             hits = v["vllm:prefix_cache_hits_total"],
             queries = v["vllm:prefix_cache_queries_total"];
           for (const [label, value] of [
+            ["Last candidate TTFT estimate", prediction ? ms(prediction.ttft_seconds) : "—"],
+            ["Estimated queue / prefill", prediction ? ms(prediction.queue_seconds) + " / " + ms(prediction.prefill_seconds) : "—"],
+            ["Estimated KV penalty", prediction ? ms(prediction.kv_seconds) : "—"],
+            ["Approximate cached tokens", prediction ? fmt(prediction.cached_tokens) : "—"],
+            ["Native data used for last score", prediction ? (prediction.native_fresh ? "Fresh at selection" : "Missing or stale; local estimates") : "—"],
             [
               "Gateway in flight",
               fmt(w.inflight) + " / " + d.pool.capacity_per_worker,

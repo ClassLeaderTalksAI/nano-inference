@@ -30,6 +30,7 @@ from .flavors import FlavorCluster, FlavorProfile, free_port, inspect_runtime
 from .gateway import Settings, create_gateway
 from .local_server import serve_app
 from .mock_worker import Behavior, create_mock_worker
+from .placement import PlacementConfig, ServiceModel
 from .tenants import Tenant, TenantConfig
 
 
@@ -381,6 +382,16 @@ class ExperimentRunner:
 
     async def finish(self, batch):
         comparisons = []
+        if batch == "placement":
+            comparisons = [
+                compare_pairs(self.runs, "placement", "successful_first_content_seconds.p95"),
+                compare_pairs(
+                    self.runs,
+                    "placement_slo",
+                    "ttft_slo_fraction_of_arrivals",
+                    higher_is_better=True,
+                ),
+            ]
         if batch == "control":
             comparisons.extend(
                 [
@@ -394,11 +405,15 @@ class ExperimentRunner:
                     ),
                 ]
             )
-        comparisons.append(
-            compare_pairs(
-                self.runs, "tenants", "successful_first_content_seconds.p95", tenant="interactive"
+        if batch != "placement":
+            comparisons.append(
+                compare_pairs(
+                    self.runs,
+                    "tenants",
+                    "successful_first_content_seconds.p95",
+                    tenant="interactive",
+                )
             )
-        )
         if batch == "metal":
             for case in ("cache", "cache_steady"):
                 comparisons.append(
@@ -440,6 +455,122 @@ class ExperimentRunner:
         )
         await asyncio.to_thread(render_report, self.output.parent, self.output)
         return report
+
+    async def placement(self):
+        """Injected heterogeneous workers and deadline admission; not GPU evidence."""
+        for case in ("placement", "placement_slo"):
+            for repeat in range(self.config.repeats):
+                variants = (
+                    ["baseline", "candidate"] if repeat % 2 == 0 else ["candidate", "baseline"]
+                )
+                for variant in variants:
+                    candidate = variant == "candidate"
+                    behavior = [
+                        Behavior(first_content_delay=0.003, chunk_delay=0.0005),
+                        Behavior(first_content_delay=0.04, chunk_delay=0.004),
+                    ]
+                    if case == "placement_slo":
+                        behavior = [Behavior(first_content_delay=0.01, chunk_delay=0.003)]
+                    model = PlacementConfig(
+                        service=ServiceModel(
+                            base_seconds=0.01,
+                            prefill_tokens_per_second=1e6,
+                            decode_tokens_per_second=1 / 0.003,
+                        ),
+                        cache_reuse_discount=0,
+                        default_slo_seconds=0.25,
+                        slo_admission=case == "placement_slo" and candidate,
+                    )
+                    if case == "placement":
+                        model.workers = {
+                            f"worker-{i + 1}": ServiceModel(
+                                base_seconds=b.first_content_delay,
+                                prefill_tokens_per_second=1e6,
+                                decode_tokens_per_second=1 / b.chunk_delay,
+                            )
+                            for i, b in enumerate(behavior)
+                        }
+                    async with AsyncExitStack() as stack:
+                        urls = [
+                            await stack.enter_async_context(
+                                serve_app(create_mock_worker(str(i), b))
+                            )
+                            for i, b in enumerate(behavior)
+                        ]
+                        settings = Settings(
+                            worker_urls=urls,
+                            capacity=1 if case == "placement_slo" else 8,
+                            max_queue=128,
+                            queue_timeout=20,
+                            prefix_preparations=32,
+                            policy="prefix_affinity"
+                            if case == "placement" and not candidate
+                            else "predicted_ttft",
+                        )
+                        path = self.output / f"{case}-{repeat}-{variant}-model.json"
+                        path.write_text(model.model_dump_json(indent=2) + "\n")
+                        settings.placement_config = str(path)
+                        arrivals = workload(
+                            "overload" if case == "placement_slo" else "routing",
+                            self.config.seed + repeat,
+                        )
+                        async with serve_app(create_gateway(settings)) as url:
+                            # Warm the HTTP/tokenizer thread path equally, with
+                            # a prompt too short to seed either prefix index.
+                            warm, _, _ = await replay(
+                                url,
+                                "nano-model",
+                                [
+                                    Arrival(-1, 0, [{"role": "user", "content": "Warmup"}], 1),
+                                    Arrival(-2, 0.02, [{"role": "user", "content": "Warmup"}], 1),
+                                ],
+                                {},
+                                self.config.max_outstanding,
+                            )
+                            results, elapsed, state = await replay(
+                                url, "nano-model", arrivals, {}, self.config.max_outstanding
+                            )
+                    slo = 0.25 if case == "placement_slo" else 0.5
+                    summary = detailed_summary(results, elapsed, slo)
+                    window = max(a.offset for a in arrivals) + slo
+                    summary["fixed_window_seconds"] = window
+                    summary["slo_goodput_fixed_window"] = (
+                        sum(
+                            r.outcome == "success"
+                            and r.first_content_seconds is not None
+                            and r.first_content_seconds <= slo
+                            for r in results
+                        )
+                        / window
+                    )
+                    await self.save(
+                        {
+                            "case": case,
+                            "repeat": repeat,
+                            "variant": variant,
+                            "backend": "simulator",
+                            "gateway_settings": asdict(settings),
+                            "placement_model": model.model_dump(),
+                            "changed_knob": {"policy": settings.policy}
+                            if case == "placement"
+                            else {"slo_admission": model.slo_admission},
+                            "injected_worker_behavior": [b.model_dump() for b in behavior],
+                            "schedule": [asdict(a) for a in arrivals],
+                            "summary": summary,
+                            "tenants": {},
+                            "quality": evidence_quality(
+                                warm + results,
+                                self.config,
+                                allow_rejections=case == "placement_slo",
+                            ),
+                            "warmup_excluded": [asdict(r) for r in warm],
+                            "final_pool": state,
+                            "results": [asdict(r) for r in results],
+                            "scope": "Rates calibrated to injected simulator delays; no real "
+                            "prefix cache, KV pressure or GPU speedup is measured.",
+                        }
+                    )
+        return await self.finish("placement")
 
     async def native_samples(self, client, urls):
         return await asyncio.gather(*(engine_snapshot(client, u) for u in urls))
@@ -664,6 +795,8 @@ async def run_experiments(
         await runner.control()
     elif batch == "metal":
         await runner.metal(profile)
+    elif batch == "placement":
+        await runner.placement()
     else:
         raise ValueError("Unknown experiment batch")
     return runner

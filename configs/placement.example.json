@@ -1,0 +1,18 @@
+{
+  "service": {
+    "base_seconds": 0.02,
+    "prefill_tokens_per_second": 1000,
+    "decode_tokens_per_second": 40,
+    "parallelism": 1
+  },
+  "cache_capacity": 4096,
+  "cache_ttl_seconds": 30,
+  "cache_reuse_discount": 0.8,
+  "metrics_max_age_seconds": 5,
+  "external_request_seconds": 0.5,
+  "kv_soft_limit": 0.8,
+  "kv_penalty_seconds": 0.5,
+  "default_slo_seconds": 2,
+  "slo_admission": false,
+  "slo_safety_factor": 1.2
+}
