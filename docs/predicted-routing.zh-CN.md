@@ -49,21 +49,22 @@ feasible = predicted_remaining_TTFT × slo_safety_factor <= remaining_budget
 缺少指标时使用本地预留与配置先验，decision 为 `predicted_ttft_local`；KV 未知显示
 `kv_cache_fraction: null`，不会伪装成原生观测的零压力。此时 KV 惩罚项省略。
 
-## 缓存索引比原来的 v1 多了什么
+## 当前缓存索引：压缩 token radix tree
 
-- 使用同一次真实 tokenizer/chat template 输出，生成 64、256、1024 token，以及
-  `min(4096, floor((input_tokens - 1)/64)*64)` 长度的前缀摘要，每请求最多四项。
-- 摘要包含模型、revision、tokenizer/template 身份和长度，再加入可信租户命名空间。
-  原始 prompt 不存入全局索引、不进入 Prometheus 标签或 monitor JSON。
-- 同一前缀可以记录多个 Worker；选择该请求在各 Worker 上最长的有效匹配。
-- 只有成功请求完成后记录；TTL 不因读取延长，LRU 限制总项数；健康状态变化清除该
-  Worker 的提示与原生样本，旧 generation 的完成不能重新预热新实例。
+- 原来四个固定长度哈希检查点已替换为真实 token 路径的压缩前缀树，支持压缩边内部
+  的任意长度 LPM。默认单路径最多 4096 tokens，全局同时限制记录、节点和 token 数。
+- 按可信租户、模型、revision、tokenizer/template 身份隔离；同一前缀可以存在于多个
+  Worker。树中的 token IDs 属于私有数据，不出现在日志、Prometheus 或 monitor JSON。
+- 只有成功请求完成后记录；读取不延长 TTL，按成功使用顺序淘汰；健康状态变化清除
+  提示与原生样本，旧 generation 的完成不能重新预热新实例。
 - `cache_reuse_discount` 折减近似命中的价值。设为 0 可以消融缓存因素；禁用引擎 APC
   时也应设为 0。`kv_penalty_seconds=0` 可以消融 KV 惩罚。
 
 这仍是 **success-history cache hints**，没有接收引擎 BlockStored/BlockRemoved 事件。
-它不知道真实淘汰，最长匹配也只覆盖有限检查点。`cached_tokens` 是路由估计，
+它不知道真实淘汰；LPM 覆盖保留路径范围，`cached_tokens` 最多为 input_tokens - 1。
+`cached_tokens` 是路由估计，
 真实 cached-token 比例必须看引擎原生 counters，不能互相替代。
+另见 [cache-aware 策略与树实现](cache-aware-routing.zh-CN.md)。
 
 ## SLO 开关和资源账本
 
@@ -133,6 +134,7 @@ Metal 冒烟记录在 `results/placement/metal-smoke.json`：真实 tokenization
 边界、原生缓存 counters、预测分解及误差；它是四次顺序请求的功能检查，不是新旧路由
 的性能对照。两个 Metal 副本共享同一块 Apple GPU。
 
+以下是 commit `5bc7303` 的检查点索引版历史结果，不能作为后续 radix tree 的性能证明。
 2026-10-19 正式 CPU 批次每项三轮 AB/BA/AB，12 个 trial 均通过有效性检查：
 
 | 对照 | 观测 | 可得出的结论 |

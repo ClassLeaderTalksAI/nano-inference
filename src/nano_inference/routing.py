@@ -14,7 +14,9 @@ from typing import Literal
 from .placement import Placement, PlacementConfig, Prediction, RouteRequest
 from .prefix import AffinityTable
 
-Policy = Literal["round_robin", "least_inflight", "prefix_affinity", "predicted_ttft"]
+Policy = Literal[
+    "round_robin", "least_inflight", "prefix_affinity", "predicted_ttft", "cache_aware"
+]
 
 
 class AdmissionError(Exception):
@@ -69,7 +71,13 @@ class WorkerPool:
             raise ValueError("Provide at least one distinct worker URL")
         if capacity < 1 or max_queue < 0 or not math.isfinite(queue_timeout) or queue_timeout <= 0:
             raise ValueError("Invalid admission limits")
-        if policy not in ("round_robin", "least_inflight", "prefix_affinity", "predicted_ttft"):
+        if policy not in (
+            "round_robin",
+            "least_inflight",
+            "prefix_affinity",
+            "predicted_ttft",
+            "cache_aware",
+        ):
             raise ValueError("Unknown routing policy")
         if affinity_max_skew < 0:
             raise ValueError("Affinity load skew must be nonnegative")
@@ -112,6 +120,9 @@ class WorkerPool:
             worker = self.placement.select_worker(route_request or RouteRequest(), candidates)
             prediction = self.placement.last_scores[worker.name]
             decision = "predicted_ttft" if prediction.native_fresh else "predicted_ttft_local"
+        elif self.policy == "cache_aware":
+            worker = self.placement.select_cache_aware(route_request or RouteRequest(), candidates)
+            decision = self.placement.last_reason
         if self.policy == "prefix_affinity":
             decision = "prefix_too_short" if prefix_key is None else "affinity_miss"
             hint = self.affinity.get(prefix_key)
@@ -131,10 +142,14 @@ class WorkerPool:
     def _reserve(self, selection, prefix_key, waited, route_request=None):
         worker, decision = selection
         prediction = None
-        if self.policy == "predicted_ttft":
+        if self.policy in ("predicted_ttft", "cache_aware"):
             route_request = route_request or RouteRequest()
             prediction = self.placement.last_scores[worker.name]
-            if self.placement.config.slo_admission and prediction.slo_feasible is False:
+            if (
+                self.policy == "predicted_ttft"
+                and self.placement.config.slo_admission
+                and prediction.slo_feasible is False
+            ):
                 self.decisions["slo_budget_exceeded"] += 1
                 raise AdmissionError(429, "slo_budget_exceeded")
         worker.inflight += 1
@@ -254,7 +269,9 @@ class WorkerPool:
             "max_queue": self.max_queue,
             "queue_timeout_seconds": self.queue_timeout,
             "route_decisions": dict(self.decisions),
-            "placement": self.placement.snapshot() if self.policy == "predicted_ttft" else None,
+            "placement": self.placement.snapshot()
+            if self.policy in ("predicted_ttft", "cache_aware")
+            else None,
             "affinity": {
                 "entries": len(self.affinity.entries),
                 "capacity": self.affinity.capacity,

@@ -60,7 +60,7 @@ class Settings:
         if self.prefix_tokens < 1 or self.prefix_preparations < 1 or not self.model_revision:
             raise ValueError("Prefix settings require positive counts and a model revision")
         if (
-            self.policy in ("prefix_affinity", "predicted_ttft")
+            self.policy in ("prefix_affinity", "predicted_ttft", "cache_aware")
             or self.tenant_config
             or self.max_model_len
         ) and self.model != "nano-model":
@@ -242,7 +242,7 @@ def create_gateway(
     @asynccontextmanager
     async def lifespan(app):
         if (
-            settings.policy in ("prefix_affinity", "predicted_ttft")
+            settings.policy in ("prefix_affinity", "predicted_ttft", "cache_aware")
             or tenant_config
             or settings.max_model_len
         ):
@@ -431,18 +431,17 @@ def create_gateway(
             async with asyncio.timeout_at(deadline):
                 key = None
                 input_tokens = 0
-                prefixes = ()
+                token_ids = ()
                 if app.state.preparer:
                     if sum(len(m.content) for m in body.messages) > 200_000:
                         outcome = "prefix_input_too_large"
                         return error(413, outcome)
-                    if settings.policy == "predicted_ttft":
-                        key, input_tokens, prefixes = await app.state.preparer.routing_features(
+                    if settings.policy in ("predicted_ttft", "cache_aware"):
+                        key, input_tokens, token_ids = await app.state.preparer.routing_features(
                             body.messages
                         )
                         if tenant_config:
                             key = digest([tenant_id, key]) if key is not None else None
-                            prefixes = tuple((digest([tenant_id, k]), n) for k, n in prefixes)
                     elif tenant_config or settings.max_model_len:
                         key, input_tokens = await app.state.preparer.prepare(body.messages)
                         if tenant_config:
@@ -466,7 +465,10 @@ def create_gateway(
                                 )
                                 if tenant_config
                                 else body.max_tokens,
-                                prefixes=prefixes,
+                                token_ids=token_ids[
+                                    : pool.placement.config.cache_max_prefix_tokens
+                                ],
+                                namespace=digest([tenant_id, app.state.preparer.encoder.identity]),
                                 deadline=arrival
                                 + (
                                     pool.states[tenant_id].config.ttft_slo_seconds
@@ -475,7 +477,7 @@ def create_gateway(
                                 ),
                             )
                         }
-                        if settings.policy == "predicted_ttft"
+                        if settings.policy in ("predicted_ttft", "cache_aware")
                         else {}
                     ),
                     **(

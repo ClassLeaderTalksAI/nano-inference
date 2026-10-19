@@ -20,7 +20,13 @@ def gateway_options(parser):
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument(
         "--policy",
-        choices=["round_robin", "least_inflight", "prefix_affinity", "predicted_ttft"],
+        choices=[
+            "round_robin",
+            "least_inflight",
+            "prefix_affinity",
+            "predicted_ttft",
+            "cache_aware",
+        ],
         default="least_inflight",
     )
     parser.add_argument("--capacity", type=int, default=4, help="In-flight limit per worker")
@@ -143,7 +149,13 @@ def main():
     serve.add_argument("--worker-ports", type=int, nargs="+")
     serve.add_argument(
         "--policy",
-        choices=["round_robin", "least_inflight", "prefix_affinity", "predicted_ttft"],
+        choices=[
+            "round_robin",
+            "least_inflight",
+            "prefix_affinity",
+            "predicted_ttft",
+            "cache_aware",
+        ],
         default="prefix_affinity",
     )
     serve.add_argument("--capacity", type=int, default=2)

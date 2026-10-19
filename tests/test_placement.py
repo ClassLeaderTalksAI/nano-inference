@@ -15,7 +15,7 @@ from .conftest import eventually
 from .test_gateway import payload
 from .test_tenants import config, config_file
 
-HOT = RouteRequest(1000, 4, (("prefix-64", 64), ("prefix-960", 960)))
+HOT = RouteRequest(1000, 4, tuple(range(1000)), "tenant:model")
 
 
 async def pool_for(**options):
@@ -31,7 +31,7 @@ async def test_cache_locality_can_win_but_long_decode_backlog_overrides_it():
     await pool.release(seed, successful=True)
     warm = await pool.acquire(route_request=HOT)
     assert warm.worker is seed.worker
-    assert warm.prediction.cached_tokens == 960
+    assert warm.prediction.cached_tokens == 999
     assert warm.prediction.ttft_seconds < 0.3
     await pool.release(warm)
     # Same request count, much larger outstanding work: route away from home.
@@ -61,14 +61,15 @@ async def test_tracks_multiple_replicas_longest_match_and_failed_work_does_not_w
     second = await pool.acquire(route_request=HOT)
     await pool.release(first, successful=True)
     await pool.release(second, successful=True)
-    assert len(pool.placement.cache) == 4
+    assert len(pool.placement.index.records) == 2
     both = [pool.placement.predict(w, HOT).cached_tokens for w in pool.workers]
-    assert both == [960, 960]
-    partial = replace(HOT, prefixes=(("prefix-64", 64), ("different-960", 960)))
-    assert pool.placement.predict(first.worker, partial).cached_tokens == 64
-    failed = await pool.acquire(route_request=replace(HOT, prefixes=(("failed", 960),)))
+    assert both == [999, 999]
+    partial = replace(HOT, token_ids=tuple(range(93)) + (9999,) * 907)
+    assert pool.placement.predict(first.worker, partial).cached_tokens == 93
+    failed_request = replace(HOT, token_ids=(9999,) * 1000)
+    failed = await pool.acquire(route_request=failed_request)
     await pool.release(failed, successful=False)
-    assert not any(k[0] == "failed" for k in pool.placement.cache)
+    assert pool.placement.predict(failed.worker, failed_request).matched_tokens == 0
 
 
 async def test_prefix_hints_are_bounded_expire_and_old_generations_cannot_rewarm():
@@ -77,9 +78,9 @@ async def test_prefix_hints_are_bounded_expire_and_old_generations_cannot_rewarm
     pool.placement.clock = lambda: now[0]
     seed = await pool.acquire(route_request=HOT)
     await pool.release(seed, successful=True)
-    other = await pool.acquire(route_request=replace(HOT, prefixes=(("third", 128),)))
+    other = await pool.acquire(route_request=replace(HOT, token_ids=(9999,) * 1000))
     await pool.release(other, successful=True)
-    assert len(pool.placement.cache) == 2
+    assert len(pool.placement.index.records) == 2
     now[0] = 3
     assert pool.placement.predict(seed.worker, HOT).cached_tokens == 0
     assert pool.placement.snapshot()["cache_entries"] == 0
@@ -87,7 +88,7 @@ async def test_prefix_hints_are_bounded_expire_and_old_generations_cannot_rewarm
     await pool.set_health(old.worker, False)
     await pool.set_health(old.worker, True)
     await pool.release(old, successful=True)
-    assert not pool.placement.cache
+    assert not pool.placement.index.records
 
 
 async def test_native_pressure_changes_choice_and_stale_samples_do_not_look_live():
@@ -264,7 +265,7 @@ async def test_placement_never_bypasses_tenant_allowlist(monkeypatch):
     await pool.release(lease)
 
 
-def test_multilength_features_distinguish_common_short_prefixes():
+def test_routing_features_keep_tokens_for_arbitrary_lpm():
     class Tokenizer:
         is_fast = True
         chat_template = "test"
@@ -284,9 +285,9 @@ def test_multilength_features_distinguish_common_short_prefixes():
     b = encoder.routing_features([Message(role="user", content="beta")])
     assert a[0] == b[0]  # Previous single-prefix policy sees the same key.
     assert a[1] == 1064
-    assert a[2][0] == b[2][0]
+    assert a[2][:64] == b[2][:64]
     assert a[2][-1] != b[2][-1]
-    assert len(a[2]) <= 4
+    assert len(a[2]) == 1064
 
 
 @pytest.mark.parametrize(
@@ -323,11 +324,12 @@ async def test_http_slo_admission_is_distinct_from_backend_failure(cluster, tmp_
         assert 'reason="slo_budget_exceeded"' in (await c.get("/metrics")).text
 
 
+@pytest.mark.parametrize("policy", ["predicted_ttft", "cache_aware"])
 async def test_http_features_are_tenant_scoped_and_predictions_are_observable(
-    cluster, tmp_path, monkeypatch
+    cluster, tmp_path, monkeypatch, policy
 ):
     cfg = config_file(tmp_path, config(monkeypatch))
-    async with cluster(policy="predicted_ttft", tenant_config=cfg) as (app, c, _):
+    async with cluster(policy=policy, tenant_config=cfg) as (app, c, _):
         body = payload()
         body["messages"][0]["content"] = "private-prompt " * 300
         for index, tenant in enumerate(("interactive", "batch", "interactive")):

@@ -11,7 +11,7 @@ from .test_gateway import payload
 from .test_tenants import config, config_file
 
 
-@pytest.mark.parametrize("policy", ["least_inflight", "predicted_ttft"])
+@pytest.mark.parametrize("policy", ["least_inflight", "predicted_ttft", "cache_aware"])
 async def test_native_polling_exposes_values_then_marks_failed_scrapes_missing(policy):
     engine = FastAPI()
     engine.state.fail = False

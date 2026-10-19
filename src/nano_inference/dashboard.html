@@ -391,6 +391,7 @@
           (d.pool.scheduler || "single-tenant FIFO") +
           " → " +
           d.pool.policy +
+          (d.pool.placement?.last_reason ? " · last decision: " + d.pool.placement.last_reason : "") +
           " · uptime " +
           fmt(d.uptime_seconds) +
           " s";
@@ -458,6 +459,8 @@
             ["Estimated queue / prefill", prediction ? ms(prediction.queue_seconds) + " / " + ms(prediction.prefill_seconds) : "—"],
             ["Estimated KV penalty", prediction ? ms(prediction.kv_seconds) : "—"],
             ["Approximate cached tokens", prediction ? fmt(prediction.cached_tokens) : "—"],
+            ["Longest token-prefix match", prediction ? fmt(prediction.matched_tokens) : "—"],
+            ["Load used for last selection", fmt(d.pool.placement?.last_loads?.[w.id])],
             ["Native data used for last score", prediction ? (prediction.native_fresh ? "Fresh at selection" : "Missing or stale; local estimates") : "—"],
             [
               "Gateway in flight",

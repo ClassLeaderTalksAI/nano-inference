@@ -4,6 +4,7 @@ Starts two owned replicas on free ports and always reaps them. This is a small
 correctness/observability run, not a comparative optimization benchmark.
 """
 
+import argparse
 import asyncio
 import json
 import os
@@ -25,7 +26,7 @@ from nano_inference.tenants import TenantConfig
 ROOT = Path(__file__).resolve().parents[1]
 
 
-async def main():
+async def main(policy="predicted_ttft", output_path=None):
     profile = FlavorProfile.load(ROOT / "configs/macos-metal.json")
     tenants = TenantConfig.load(ROOT / "configs/tenants.example.json")
     keys = {t.id: uuid.uuid4().hex for t in tenants.tenants}
@@ -33,7 +34,7 @@ async def main():
         os.environ[t.api_key_env] = keys[t.id]
     runtime = await inspect_runtime(profile, ROOT)
     ports = [free_port() for _ in range(3)]
-    output = ROOT / "results/placement/metal-smoke.json"
+    output = Path(output_path) if output_path else ROOT / "results/placement/metal-smoke.json"
     output.parent.mkdir(parents=True, exist_ok=True)
     checks = []
     with tempfile.TemporaryDirectory(dir=ROOT / ".local", prefix="placement-smoke-") as tmp:
@@ -45,7 +46,7 @@ async def main():
             workers=2,
             port=ports[0],
             worker_ports=ports[1:],
-            policy="predicted_ttft",
+            policy=policy,
             tenant_config=str(path),
             request_timeout=90,
             placement_config=str(ROOT / "configs/placement.example.json"),
@@ -67,6 +68,9 @@ async def main():
             ]
             async with httpx.AsyncClient(trust_env=False, timeout=95) as client:
                 for i, tenant in enumerate(["interactive", "interactive", "batch", "batch"]):
+                    request_messages = [dict(m) for m in messages]
+                    if i % 2:
+                        request_messages[-1]["content"] = "Name two animals."
                     before = await runner.native_samples(client, cluster.worker_urls)
                     result = await send_request(
                         client,
@@ -75,7 +79,7 @@ async def main():
                         8,
                         i,
                         time.perf_counter(),
-                        messages,
+                        request_messages,
                         {"Authorization": "Bearer " + keys[tenant]},
                     )
                     assert result.outcome == "success", result
@@ -89,6 +93,11 @@ async def main():
                     hits = sum(d["hit_tokens"] for d in deltas)
                     assert (hits > 0) == (i % 2 == 1), (i, hits)
                     assert (prediction["cached_tokens"] > 0) == (i % 2 == 1), prediction
+                    if i % 2:
+                        assert 0 < prediction["matched_tokens"] < result.prompt_tokens
+                        if policy == "cache_aware":
+                            assert result.route_decision == "cache_affinity"
+                    assert placement["prefix_index"]["kind"] == "approximate-token-radix-tree"
                     checks.append(
                         {
                             "tenant": tenant,
@@ -111,11 +120,13 @@ async def main():
         "checked_at_utc": datetime.now(UTC).isoformat(),
         "metadata": source_metadata(ROOT),
         "runtime": runtime,
+        "policy": policy,
         "checks": checks,
         "final_placement": placement,
         "ports_closed": True,
         "scope": "Two replicas share one Apple GPU. Four sequential requests verify native "
-        "cache namespaces and routing observability, not performance improvement or SLO goodput. "
+        "cache namespaces and shared-prefix/different-suffix routing, not performance improvement "
+        "or load-imbalance performance or SLO goodput. "
         "Service rates are uncalibrated example priors; compare predictions with observations.",
     }
     output.write_text(json.dumps(report, indent=2) + "\n")
@@ -123,4 +134,10 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--policy", choices=["predicted_ttft", "cache_aware"], default="predicted_ttft"
+    )
+    parser.add_argument("--output")
+    args = parser.parse_args()
+    asyncio.run(main(args.policy, args.output))

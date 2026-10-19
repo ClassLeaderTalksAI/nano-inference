@@ -70,23 +70,15 @@ class PrefixEncoder:
         return self.prepare(messages)[0]
 
     def routing_features(self, messages: list[Message]):
-        """Tokenize once; keep a bounded set of multi-length prefix fingerprints.
-
-        The last checkpoint is rounded down to 64 tokens, leaving at least one
-        token to compute. Synthetic mode uses whitespace pseudo-tokens for costs.
-        """
+        """Tokenize once for real arbitrary-length LPM; retain the legacy key."""
         ids = self.tokenize(messages)
         key = digest([self.identity, ids[: self.tokens]]) if len(ids) >= self.tokens else None
         if self.tokenizer is None:
-            ids = [(m.role, word) for m in messages for word in m.content.split()]
+            ids = [
+                int(digest([m.role, word])[:32], 16) for m in messages for word in m.content.split()
+            ]
         count = len(ids)
-        lengths = {64, 256, 1024, min(4096, (count - 1) // 64 * 64)}
-        prefixes = tuple(
-            (digest(["placement-v1", self.identity, n, ids[:n]]), n)
-            for n in sorted(lengths)
-            if 0 < n < count
-        )
-        return key, count, prefixes
+        return key, count, tuple(ids)
 
 
 class PrefixPreparer:

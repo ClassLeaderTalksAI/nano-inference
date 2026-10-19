@@ -54,7 +54,7 @@ async def acquire(pool, tenant="interactive", input_tokens=0, max_tokens=16):
     return await pool.acquire(tenant=tenant, input_tokens=input_tokens, max_tokens=max_tokens)
 
 
-@pytest.mark.parametrize("policy", ["least_inflight", "predicted_ttft"])
+@pytest.mark.parametrize("policy", ["least_inflight", "predicted_ttft", "cache_aware"])
 async def test_saturated_wdrr_shares_token_cost_5_3_1_without_starvation(monkeypatch, policy):
     pool = await pool_for(monkeypatch)
     pool.policy = policy

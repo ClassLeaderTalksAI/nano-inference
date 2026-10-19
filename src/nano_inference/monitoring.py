@@ -92,6 +92,7 @@ class Monitor:
             "prefill_seconds",
             "kv_seconds",
             "cached_tokens",
+            "matched_tokens",
         ):
             gauge = Gauge(
                 "nano_route_last_" + field,
